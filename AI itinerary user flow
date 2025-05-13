@@ -1,0 +1,170 @@
+ ## AI-Powered Itinerary Creation: User Journey & Interaction Flow
+---
+
+### Flow Diagram (ASCII)
+
+```plaintext
+[Start] --> [Dashboard]
+   |
+   v
+[Initiate New Trip] --> [Enter Trip Parameters]
+   |                         |
+   |                         v
+   |                   [Validate Inputs]
+   |                         |
+   |                         v
+   |                  [Error?]---Yes--->[Show Validation Errors]
+   |                         |No
+   v                         v
+[AI Generate Draft Itinerary] --> [Display Suggestions]
+   |                                     |
+   v                                     v
+[User Reviews Itinerary] <--- [Customize & Modify]
+   |            |                     |
+   |            v                     v
+   |       [Add/Remove Items]       [Adjust Dates/Budgets]
+   |            |                     |
+   v            v                     v
+[Save Draft] <---------------- [Real-time Feedback]
+   |                                     |
+   v                                     v
+[Manage Itineraries] --> [Select/Share/Export]
+   |
+   v
+[End]
+```
+
+---
+
+## 1. Itinerary Creation Initiation
+
+**User Action:** Click on "New Itinerary" or tap the "+" icon on dashboard.
+
+* **Possible Inputs:** Trip name, destination(s), dates, traveler count.
+* **System Response:** Opens a parameter form.
+* **Validation:** Checks required fields (e.g., destination not empty, date logic).
+* **Edge Case:** Missing or invalid date → inline error messages.
+
+---
+
+## 2. Providing Initial Trip Parameters
+
+**User Action:** Fill in form: destination, travel\_dates, interests, budget, pace (relaxed/packed).
+
+* **System Validation:**
+
+  * Date range overlap or past dates → prompt correction.
+  * Budget out of realistic range → warning but allow override.
+
+* **Alternative Path:** User uploads a rough outline (CSV or previous plan) → system ingests and pre-fills form.
+
+---
+
+## 3. AI Suggestion Generation
+
+**AI Processing Steps:**
+
+1. Fetch destination data (points of interest, typical duration).
+2. Analyze user parameters (interests, pace, budget).
+3. Run itinerary-generation model to propose day-by-day schedule.
+4. Enrich with practical details (opening hours, transportation).
+
+**System Response:**
+
+* Display a draft itinerary overview with days, timings, and places.
+* Show confidence levels or AI notes (e.g., "2h recommended at Louvre").
+
+**User Interaction Options:**
+
+* Accept entire draft.
+* Dive into a specific day for granular edits.
+* Regenerate suggestions (with toggles for pace or focus).
+
+---
+
+## 4. Itinerary Customization & Real-time Feedback
+
+**Customization Mechanisms:**
+
+* Drag & drop activities between days.
+* Add new POIs or remove unwanted ones.
+* Adjust start/end times via time pickers.
+* Toggle alternative travel modes (walk, bus, train).
+
+**Real-time Feedback Loop:**
+
+* System re-computes timing conflicts.
+* Highlights overlapping events in red.
+* Provides alternate recommendations when slot freed.
+
+**Constraints:**
+
+* Cannot exceed daily time budget (e.g., 8–12h/day unless user overrides).
+* Closed attractions filtered out automatically.
+
+---
+
+## 5. Saving & Managing Itineraries
+
+**Save Mechanisms:**
+
+* Auto-save draft after each modification.
+* Manual "Save & Name" button for final versions.
+
+**Management Options:**
+
+* Itinerary dashboard: list view with thumbnails, tags (e.g., "Paris Summer").
+* Actions: Edit, Duplicate, Delete, Share, Export (PDF/CSV).
+
+**Multi-trip Handling:**
+
+* Folder or tag-based organization.
+* Filter by status: Draft, Published, Archived.
+
+---
+
+## 6. Sharing & Exporting
+
+* **Share Links:** Generate a view-only web link.
+* **Collaborators:** Invite others to view or co-edit.
+* **Export Formats:** PDF (print-ready), CSV for spreadsheets, ICS calendar feed.
+
+---
+
+## User Personas & Use Cases
+
+**Persona 1: Emily, the Spontaneous Solo Traveler**
+
+* Wants a quick plan for a 3-day weekend in Lisbon.
+* Uses defaults, reviews and saves within 2 minutes.
+* Edge Case: Unpredictable weather → system suggests indoor alternatives.
+
+**Persona 2: Raj & Priya, Family with Young Kids**
+
+* Need kid-friendly attractions and midday breaks.
+* Use customization to add park/playground slots.
+* Edge Case: One-day bus strike → system flags public transport alerts.
+
+---
+
+## Potential Challenges & Mitigations
+
+**Challenge 1:** Overwhelming number of suggestions.
+
+* **Mitigation:** Progressive disclosure—show top 3, with "See more" toggle.
+
+**Challenge 2:** AI misinterprets niche interests.
+
+* **Mitigation:** Offer "Refine Interest" sliders and feedback prompts.
+
+**Challenge 3:** Timing conflicts during customization.
+
+* **Mitigation:** Real-time conflict detection and contextual tips.
+
+---
+
+**End-to-End Happy Path:**
+
+1. User clicks New Itinerary → fills form → AI draft appears → user reviews → drags a museum to Day 2 → saves plan → shares link with friends.
+
+This flow ensures clarity, flexibility, and control, making Travel Trove feel both intelligent and user-centric from conception to sharing.
