@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 export enum DietaryRestriction {
   VEGETARIAN = "vegetarian",
   VEGAN = "vegan",
@@ -24,7 +26,14 @@ export enum TravelStyle {
 }
 
 export interface DietaryPreferences {
-  restrictions: DietaryRestriction[];
+  restrictions: (
+    | "vegetarian"
+    | "vegan"
+    | "gluten-free"
+    | "kosher"
+    | "halal"
+    | "none"
+  )[];
   allergies: string[];
   additionalNotes?: string;
 }
@@ -37,14 +46,17 @@ export interface MobilityRequirements {
 }
 
 export interface TravelInterests {
-  preferredStyles: TravelStyle[];
-  activityPreferences: {
-    outdoor: boolean;
-    cultural: boolean;
-    nightlife: boolean;
-    shopping: boolean;
-  };
-  mustAvoid?: string[];
+  preferredActivities: string[];
+  preferredDestinations: string[];
+  preferredAccommodationTypes: (
+    | "hotel"
+    | "hostel"
+    | "apartment"
+    | "resort"
+    | "camping"
+  )[];
+  preferredTransportation: ("public" | "private" | "walking" | "cycling")[];
+  additionalNotes?: string;
 }
 
 export interface BudgetRange {
@@ -67,11 +79,26 @@ export interface ActivityComfortLevels {
   crowdedPlaces: 1 | 2 | 3 | 4 | 5;
 }
 
+export interface MobilityPreferences {
+  hasMobilityNeeds: boolean;
+  requiresWheelchair: boolean;
+  requiresElevator: boolean;
+  additionalNotes?: string;
+}
+
 export interface UserPreferences {
-  userId: string;
+  userId: Types.ObjectId;
   dietary: DietaryPreferences;
-  mobility: MobilityRequirements;
-  interests: TravelInterests;
+  mobility: MobilityPreferences;
+  travelInterests: TravelInterests;
+  notificationPreferences: {
+    email: boolean;
+    push: boolean;
+    sms: boolean;
+  };
+  languagePreference: string;
+  currencyPreference: string;
+  timezonePreference: string;
   budget: BudgetRange;
   dailyBudget: {
     min: number;

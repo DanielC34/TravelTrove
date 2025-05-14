@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { authRouter } from "./routes/auth";
+import { preferencesRouter } from "./routes/preferences.routes";
 
 // Load environment variables
 dotenv.config();
@@ -15,6 +16,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/auth", authRouter);
+app.use("/api/preferences", preferencesRouter);
 
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI;

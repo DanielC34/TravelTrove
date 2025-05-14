@@ -1,119 +1,124 @@
-import fetch from 'node-fetch';
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
+import { register, login } from "../controllers/auth.controller";
+import { User } from "../models/user.model";
+import mongoose from "mongoose";
 
-const API_URL = 'http://localhost:3000/api';
+describe("Auth Controller", () => {
+  const mockRequest = {
+    body: {
+      name: "Test User",
+      email: "test@example.com",
+      password: "password123",
+    },
+  };
 
-async function testRegistration() {
-  console.log('\n🧪 Testing Registration...');
-  try {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: 'Test User',
-        email: 'test@example.com',
-        password: 'password123',
-      }),
+  const mockResponse = {
+    status: vi.fn().mockReturnThis(),
+    json: vi.fn(),
+  };
+
+  beforeAll(async () => {
+    // Clear users collection before tests
+    await User.deleteMany({});
+  });
+
+  afterAll(async () => {
+    // Clean up after tests
+    await User.deleteMany({});
+  });
+
+  describe("Registration", () => {
+    it("should register a new user successfully", async () => {
+      await register(mockRequest as any, mockResponse as any);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(201);
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.any(String),
+          token: expect.any(String),
+          user: expect.objectContaining({
+            email: mockRequest.body.email,
+            name: mockRequest.body.name,
+          }),
+        })
+      );
     });
 
-    const data = await response.json();
-    console.log('Status:', response.status);
-    console.log('Response:', data);
+    it("should not register a user with existing email", async () => {
+      // First registration
+      await register(mockRequest as any, mockResponse as any);
+      // Reset mocks
+      vi.clearAllMocks();
+      // Try to register again
+      await register(mockRequest as any, mockResponse as any);
 
-    if (response.ok) {
-      console.log('✅ Registration test passed');
-      return data.token;
-    } else {
-      console.log('❌ Registration test failed');
-      return null;
-    }
-  } catch (error) {
-    console.error('❌ Registration test error:', error);
-    return null;
-  }
-}
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.any(String),
+        })
+      );
+    });
+  });
 
-async function testLogin() {
-  console.log('\n🧪 Testing Login...');
-  try {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: 'test@example.com',
-        password: 'password123',
-      }),
+  describe("Login", () => {
+    it("should login successfully with correct credentials", async () => {
+      // First register a user
+      await register(mockRequest as any, mockResponse as any);
+      // Reset mocks
+      vi.clearAllMocks();
+      // Try to login
+      await login(mockRequest as any, mockResponse as any);
+
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.any(String),
+          token: expect.any(String),
+          user: expect.objectContaining({
+            email: mockRequest.body.email,
+            name: mockRequest.body.name,
+          }),
+        })
+      );
     });
 
-    const data = await response.json();
-    console.log('Status:', response.status);
-    console.log('Response:', data);
+    it("should not login with incorrect password", async () => {
+      const invalidRequest = {
+        ...mockRequest,
+        body: {
+          ...mockRequest.body,
+          password: "wrongpassword",
+        },
+      };
 
-    if (response.ok) {
-      console.log('✅ Login test passed');
-      return data.token;
-    } else {
-      console.log('❌ Login test failed');
-      return null;
-    }
-  } catch (error) {
-    console.error('❌ Login test error:', error);
-    return null;
-  }
-}
+      await login(invalidRequest as any, mockResponse as any);
 
-async function testInvalidLogin() {
-  console.log('\n🧪 Testing Invalid Login...');
-  try {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email: 'test@example.com',
-        password: 'wrongpassword',
-      }),
+      expect(mockResponse.status).toHaveBeenCalledWith(401);
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.any(String),
+        })
+      );
     });
 
-    const data = await response.json();
-    console.log('Status:', response.status);
-    console.log('Response:', data);
+    it("should not login with non-existent email", async () => {
+      const invalidRequest = {
+        ...mockRequest,
+        body: {
+          ...mockRequest.body,
+          email: "nonexistent@example.com",
+        },
+      };
 
-    if (!response.ok) {
-      console.log('✅ Invalid login test passed');
-    } else {
-      console.log('❌ Invalid login test failed');
-    }
-  } catch (error) {
-    console.error('❌ Invalid login test error:', error);
-  }
-}
+      await login(invalidRequest as any, mockResponse as any);
 
-async function runTests() {
-  console.log('🚀 Starting authentication tests...\n');
-
-  // Test registration
-  const registrationToken = await testRegistration();
-  if (!registrationToken) {
-    console.log('⚠️ Skipping remaining tests due to registration failure');
-    return;
-  }
-
-  // Test login
-  const loginToken = await testLogin();
-  if (!loginToken) {
-    console.log('⚠️ Login test failed');
-  }
-
-  // Test invalid login
-  await testInvalidLogin();
-
-  console.log('\n✨ All tests completed!');
-}
-
-// Run the tests
-runTests().catch(console.error); 
+      expect(mockResponse.status).toHaveBeenCalledWith(401);
+      expect(mockResponse.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.any(String),
+        })
+      );
+    });
+  });
+});
