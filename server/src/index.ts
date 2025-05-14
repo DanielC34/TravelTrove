@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import { authRouter } from "./routes/auth";
+import { authRouter } from "./routes/auth.routes";
 import { preferencesRouter } from "./routes/preferences.routes";
 
 // Load environment variables
