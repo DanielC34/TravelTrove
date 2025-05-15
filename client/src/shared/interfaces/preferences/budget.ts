@@ -101,3 +101,17 @@ export interface BudgetRange {
    */
   flexibilityPercentage?: number;
 }
+
+export enum BudgetLevel {
+  BUDGET = "budget",
+  MODERATE = "moderate",
+  LUXURY = "luxury",
+}
+
+export interface BudgetPreferences {
+  accommodation: BudgetLevel;
+  activities: BudgetLevel;
+  dining: BudgetLevel;
+  flexibility: "strict" | "moderate" | "flexible";
+  currency: string;
+}

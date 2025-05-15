@@ -64,3 +64,32 @@ export interface MobilityRequirements {
    */
   importanceLevel: number;
 }
+
+export enum MobilityLevel {
+  FULLY_ABLE = "fully_able",
+  LIGHT_ASSISTANCE = "light_assistance",
+  MODERATE_ASSISTANCE = "moderate_assistance",
+  WHEELCHAIR = "wheelchair",
+}
+
+export interface MobilityPreferences {
+  level: MobilityLevel;
+  requirements: {
+    wheelchairAccess: boolean;
+    elevatorAccess: boolean;
+    ramps: boolean;
+    limitedStairs: boolean;
+    restAreas: boolean;
+  };
+  assistance: {
+    walkingAid: boolean;
+    wheelchair: boolean;
+    mobilityScooter: boolean;
+    personalAssistant: boolean;
+  };
+  limitations: {
+    maxWalkingDistance: number; // in meters
+    maxStandingTime: number; // in minutes
+    restFrequency: number; // in minutes
+  };
+}

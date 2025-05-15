@@ -7,15 +7,15 @@
  * Common dietary restrictions
  */
 export enum DietaryRestriction {
+  NONE = "none",
   VEGETARIAN = "vegetarian",
   VEGAN = "vegan",
   PESCATARIAN = "pescatarian",
-  GLUTEN_FREE = "gluten-free",
-  DAIRY_FREE = "dairy-free",
-  NUT_FREE = "nut-free",
-  KOSHER = "kosher",
+  GLUTEN_FREE = "gluten_free",
+  DAIRY_FREE = "dairy_free",
+  NUT_FREE = "nut_free",
   HALAL = "halal",
-  NONE = "none",
+  KOSHER = "kosher",
 }
 
 /**
@@ -59,4 +59,14 @@ export interface DietaryPreferences {
    * 1 = Nice to have, 5 = Absolute requirement
    */
   importanceLevel: number;
+
+  /**
+   * Meal preferences
+   */
+  preferences: {
+    spicy: "none" | "mild" | "medium" | "hot";
+    localCuisine: boolean;
+    streetFood: boolean;
+    fineDining: boolean;
+  };
 }

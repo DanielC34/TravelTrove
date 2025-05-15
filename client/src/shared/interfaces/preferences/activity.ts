@@ -7,11 +7,11 @@
  * Physical activity intensity levels
  */
 export enum PhysicalIntensity {
-  SEDENTARY = "sedentary",
-  LIGHT = "light",
-  MODERATE = "moderate",
-  VIGOROUS = "vigorous",
-  EXTREME = "extreme",
+  SEDENTARY = "SEDENTARY",
+  LIGHT = "LIGHT",
+  MODERATE = "MODERATE",
+  VIGOROUS = "VIGOROUS",
+  EXTREME = "EXTREME",
 }
 
 /**
@@ -105,4 +105,20 @@ export interface ActivityComfortLevels {
    * Additional comfort notes
    */
   additionalNotes?: string;
+}
+
+export interface ActivityComfortPreferences {
+  maxDuration: string;
+  preferredIntensity: PhysicalIntensity;
+  restDayFrequency: string;
+  preferredActivities: string[];
+  limitations?: {
+    maxDailyActivities: number;
+    preferredTimeOfDay: "morning" | "afternoon" | "evening" | "flexible";
+    weatherPreferences: {
+      avoidRain: boolean;
+      avoidExtremeHeat: boolean;
+      avoidExtremeCold: boolean;
+    };
+  };
 }
