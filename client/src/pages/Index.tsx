@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { AuthModal } from "@/components/AuthModal";
 import { TripBuilder } from "@/components/TripBuilder";
 import { Footer } from "@/components/Footer";
 import { MapPin, PlayCircle, ArrowRight, ChevronDown } from "lucide-react";
-import { useAuthStore } from "@/stores/useAuthStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { toast } from "sonner";
 
 const Index = () => {

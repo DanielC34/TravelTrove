@@ -68,5 +68,5 @@ export const useAuthStore = create<AuthState>((set) => ({
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     toast.success("You have been logged out");
-  }
+  },
 }));

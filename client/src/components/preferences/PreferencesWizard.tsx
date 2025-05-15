@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { usePreferences } from "../../contexts/PreferencesContext";
+import { usePreferences } from "../../context/PreferencesContext";
 import { DietaryCheckboxGroup } from "./DietaryCheckboxGroup";
 import { MobilityCheckboxGroup } from "./MobilityCheckboxGroup";
 import { InterestsSliderGroup } from "./InterestsSliderGroup";
@@ -228,9 +228,13 @@ export const PreferencesWizard: React.FC<PreferencesWizardProps> = ({
   initialData,
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [stepCompletion, setStepCompletion] = useState<Record<string, boolean>>({});
-  
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
+  const [stepCompletion, setStepCompletion] = useState<Record<string, boolean>>(
+    {}
+  );
+
   const { isLoading, error: contextError } = usePreferences();
 
   const methods = useForm<PreferencesFormData>({
@@ -267,7 +271,8 @@ export const PreferencesWizard: React.FC<PreferencesWizardProps> = ({
       }
     } catch (err) {
       setValidationErrors({
-        [currentStepId]: "An error occurred while validating the form. Please try again.",
+        [currentStepId]:
+          "An error occurred while validating the form. Please try again.",
       });
     }
   };
@@ -319,13 +324,19 @@ export const PreferencesWizard: React.FC<PreferencesWizardProps> = ({
         </div>
 
         {contextError && (
-          <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+          <div
+            className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg"
+            role="alert"
+          >
             {contextError}
           </div>
         )}
 
         {Object.keys(validationErrors).length > 0 && (
-          <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+          <div
+            className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg"
+            role="alert"
+          >
             <ul className="list-disc list-inside">
               {Object.entries(validationErrors).map(([key, message]) => (
                 <li key={key}>{message}</li>
@@ -365,9 +376,25 @@ export const PreferencesWizard: React.FC<PreferencesWizardProps> = ({
             >
               {isLoading ? (
                 <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Saving...
                 </span>

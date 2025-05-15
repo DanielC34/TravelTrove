@@ -12,7 +12,7 @@ import { ActivityComfortSliderGroup } from "./ActivityComfortSliderGroup";
 import { TransportationCheckboxGroup } from "./TransportationCheckboxGroup";
 import { TravelStyleCheckboxGroup } from "./TravelStyleCheckboxGroup";
 import { SpecialRequirementsTextArea } from "./SpecialRequirementsTextArea";
-import { usePreferences } from "../../contexts/PreferencesContext";
+import { usePreferences } from "../../context/PreferencesContext";
 
 // Reuse the schema from PreferencesWizard
 const preferencesSchema = z.object({

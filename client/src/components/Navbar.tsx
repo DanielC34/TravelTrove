@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AuthModal } from "./AuthModal";
-import { useAuthStore } from "@/stores/useAuthStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function Navbar() {
