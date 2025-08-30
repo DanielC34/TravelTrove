@@ -1,266 +1,194 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuthStore } from "@/stores/useAuthStore";
 import {
-  Menu,
-  X,
-  MapPin,
-  User,
-  ChevronDown,
-  LogOut,
-  Settings,
-  Heart,
-  HelpCircle,
-} from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuGroup,
-} from "@/components/ui/dropdown-menu";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { AuthModal } from "./AuthModal";
-import { useAuthStore } from "@/store/useAuthStore";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+  FaPlane,
+  FaUser,
+  FaSignOutAlt,
+  FaBars,
+  FaTimes,
+  FaSearch,
+  FaBell,
+} from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
-export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const isMobile = useIsMobile();
+const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isAuthenticated, logout } = useAuthStore();
-
-  const handleNavigate = (path: string) => {
-    navigate(path);
-    setIsMenuOpen(false);
-  };
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
+  const isActive = (path: string) => location.pathname === path;
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 md:px-8">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center">
-          <button
-            onClick={() => handleNavigate("/")}
-            className="flex items-center gap-2 font-semibold text-xl"
-          >
-            <MapPin className="h-5 w-5 text-turquoise-500" />
-            <span className="bg-gradient-to-r from-turquoise-400 to-turquoise-600 bg-clip-text text-transparent">
+    <nav className="bg-white shadow-lg border-b border-gray-100 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+              <FaPlane className="text-white text-xl" />
+            </div>
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               TravelTrove
             </span>
-          </button>
-        </div>
+          </Link>
 
-        {!isMobile ? (
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-6">
-              <button
-                onClick={() => handleNavigate("/")}
-                className="text-gray-600 hover:text-turquoise-500 transition-colors"
-              >
-                Home
-              </button>
-              {isAuthenticated && (
-                <>
-                  <button
-                    onClick={() => handleNavigate("/trips")}
-                    className="text-gray-600 hover:text-turquoise-500 transition-colors"
-                  >
-                    My Trips
-                  </button>
-                  <button
-                    onClick={() => handleNavigate("/explore")}
-                    className="text-gray-600 hover:text-turquoise-500 transition-colors"
-                  >
-                    Explore
-                  </button>
-                </>
-              )}
-            </div>
-
-            <div className="flex items-center gap-3">
-              {isAuthenticated ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="relative h-10 w-10 rounded-full hover:bg-gray-100"
-                    >
-                      <Avatar className="h-10 w-10 border border-turquoise-200">
-                        <AvatarFallback className="bg-turquoise-50 text-turquoise-700">
-                          {user?.name?.charAt(0) || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-72" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">
-                          {user?.name}
-                        </p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                          {user?.email}
-                        </p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem
-                        onClick={() => handleNavigate("/trips")}
-                      >
-                        <MapPin className="mr-2 h-4 w-4" />
-                        <span>My Trips</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleNavigate("/explore")}
-                      >
-                        <Heart className="mr-2 h-4 w-4" />
-                        <span>Explore</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuGroup>
-                      <DropdownMenuItem
-                        onClick={() => handleNavigate("/settings")}
-                      >
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleNavigate("/help")}>
-                        <HelpCircle className="mr-2 h-4 w-4" />
-                        <span>Help Center</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleLogout}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              ) : (
-                <>
-                  <Button
-                    variant="outline"
-                    className="border-turquoise-200 text-turquoise-700 hover:bg-turquoise-50"
-                    onClick={() => setShowAuthModal(true)}
-                  >
-                    Log in
-                  </Button>
-                  <Button
-                    className="bg-turquoise-500 hover:bg-turquoise-600 text-white"
-                    onClick={() => setShowAuthModal(true)}
-                  >
-                    Sign up
-                  </Button>
-                </>
-              )}
-            </div>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            <Link
+              to="/trips"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                isActive("/trips")
+                  ? "bg-blue-50 text-blue-600"
+                  : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+              }`}
+            >
+              <span>My Trips</span>
+            </Link>
+            <Link
+              to="/explore"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                isActive("/explore")
+                  ? "bg-blue-50 text-blue-600"
+                  : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+              }`}
+            >
+              <span>Explore</span>
+            </Link>
           </div>
-        ) : (
-          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Toggle menu"
-                className="md:hidden"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="pt-10">
-              <div className="flex flex-col gap-6">
-                <button
-                  onClick={() => handleNavigate("/")}
-                  className="flex items-center gap-2 text-lg font-medium"
-                >
-                  Home
-                </button>
 
-                {isAuthenticated ? (
-                  <>
-                    <button
-                      onClick={() => handleNavigate("/trips")}
-                      className="flex items-center gap-2 text-lg font-medium"
-                    >
-                      My Trips
-                    </button>
-                    <button
-                      onClick={() => handleNavigate("/explore")}
-                      className="flex items-center gap-2 text-lg font-medium"
-                    >
-                      Explore
-                    </button>
-                    <div className="h-px w-full bg-gray-100 my-2"></div>
-                    <div className="flex items-center gap-3 px-1 py-2">
-                      <Avatar className="h-9 w-9 border border-turquoise-200">
-                        <AvatarFallback className="bg-turquoise-50 text-turquoise-700">
-                          {user?.name?.charAt(0) || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{user?.name}</span>
-                        <span className="text-sm text-muted-foreground">
-                          {user?.email}
-                        </span>
-                      </div>
-                    </div>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        handleLogout();
-                        setIsMenuOpen(false);
-                      }}
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Log out
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <div className="h-px w-full bg-gray-100 my-2"></div>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-center border-turquoise-200 text-turquoise-700 hover:bg-turquoise-50"
-                      onClick={() => {
-                        setShowAuthModal(true);
-                        setIsMenuOpen(false);
-                      }}
-                    >
-                      Log in
-                    </Button>
-                    <Button
-                      className="w-full justify-center bg-turquoise-500 hover:bg-turquoise-600 text-white"
-                      onClick={() => {
-                        setShowAuthModal(true);
-                        setIsMenuOpen(false);
-                      }}
-                    >
-                      Sign up
-                    </Button>
-                  </>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
-        )}
+          {/* User Menu */}
+          <div className="hidden md:flex items-center space-x-4">
+            {isAuthenticated ? (
+              <>
+                <button className="p-2 text-gray-600 hover:text-blue-600 transition-colors">
+                  <FaSearch className="text-lg" />
+                </button>
+                <button className="p-2 text-gray-600 hover:text-blue-600 transition-colors relative">
+                  <FaBell className="text-lg" />
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                    3
+                  </span>
+                </button>
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                    <FaUser className="text-white text-sm" />
+                  </div>
+                  <div className="text-sm">
+                    <p className="font-medium text-gray-900">{user?.name}</p>
+                    <p className="text-gray-500">{user?.email}</p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="p-2 text-gray-600 hover:text-red-600 transition-colors"
+                    title="Sign Out"
+                  >
+                    <FaSignOutAlt className="text-lg" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <Link
+                to="/auth"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                Sign In
+              </Link>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              {isMobileMenuOpen ? (
+                <FaTimes className="text-xl" />
+              ) : (
+                <FaBars className="text-xl" />
+              )}
+            </button>
+          </div>
+        </div>
       </div>
 
-      <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-white border-t border-gray-100"
+          >
+            <div className="px-4 py-6 space-y-4">
+              <Link
+                to="/trips"
+                className={`block px-4 py-2 rounded-lg transition-colors ${
+                  isActive("/trips")
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                My Trips
+              </Link>
+              <Link
+                to="/explore"
+                className={`block px-4 py-2 rounded-lg transition-colors ${
+                  isActive("/explore")
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Explore
+              </Link>
+
+              {isAuthenticated ? (
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                      <FaUser className="text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{user?.name}</p>
+                      <p className="text-sm text-gray-500">{user?.email}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <FaSignOutAlt />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/auth"
+                  className="block bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg text-center hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign In
+                </Link>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
-}
+};
+
+export default Navbar;

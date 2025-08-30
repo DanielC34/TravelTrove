@@ -25,6 +25,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { tripService, CreateTripData } from "@/services/tripService";
 
 interface TripBuilderProps {
   onComplete: (tripData: any) => void;
@@ -48,8 +49,10 @@ export function TripBuilder({ onComplete }: TripBuilderProps) {
     "slider" | "direct"
   >("slider");
   const [destination, setDestination] = useState("");
+  const [tripName, setTripName] = useState("");
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   const moveToNextTab = () => {
     if (activeTab === "travelers") {
@@ -80,15 +83,25 @@ export function TripBuilder({ onComplete }: TripBuilderProps) {
   const getBudgetLabel = () => {
     if (budgetInputMethod === "direct") {
       const amount = parseInt(directBudget);
-      if (amount <= 1500) return "Budget";
-      if (amount <= 3000) return "Moderate";
-      if (amount <= 5000) return "Premium";
-      return "Luxury";
+      if (amount <= 1500) return "budget";
+      if (amount <= 3000) return "moderate";
+      if (amount <= 5000) return "premium";
+      return "luxury";
     }
-    if (budget[0] <= 25) return "Budget";
-    if (budget[0] <= 50) return "Moderate";
-    if (budget[0] <= 75) return "Premium";
-    return "Luxury";
+    if (budget[0] <= 25) return "budget";
+    if (budget[0] <= 50) return "moderate";
+    if (budget[0] <= 75) return "premium";
+    return "luxury";
+  };
+
+  const getBudgetAmount = () => {
+    if (budgetInputMethod === "direct") {
+      return parseInt(directBudget) || 0;
+    }
+    if (budget[0] <= 25) return 1500;
+    if (budget[0] <= 50) return 3000;
+    if (budget[0] <= 75) return 5000;
+    return 6000;
   };
 
   const getBudgetRange = () => {
@@ -104,36 +117,25 @@ export function TripBuilder({ onComplete }: TripBuilderProps) {
   const getBudgetDescription = () => {
     if (budgetInputMethod === "direct") {
       const amount = parseInt(directBudget);
-      if (amount <= 1500)
-        return "Economy accommodations, local experiences, and budget-friendly activities";
-      if (amount <= 3000)
-        return "Comfortable hotels, mix of local and premium experiences";
-      if (amount <= 5000)
-        return "High-end hotels, exclusive experiences, and premium services";
-      return "Luxury accommodations, private experiences, and VIP services";
+      if (amount <= 1500) return "Hostels, budget hotels, street food";
+      if (amount <= 3000) return "Mid-range hotels, mix of dining options";
+      if (amount <= 5000) return "Premium hotels, fine dining experiences";
+      return "Luxury accommodations, exclusive experiences";
     }
-    if (budget[0] <= 25)
-      return "Economy accommodations, local experiences, and budget-friendly activities";
-    if (budget[0] <= 50)
-      return "Comfortable hotels, mix of local and premium experiences";
-    if (budget[0] <= 75)
-      return "High-end hotels, exclusive experiences, and premium services";
-    return "Luxury accommodations, private experiences, and VIP services";
+    if (budget[0] <= 25) return "Hostels, budget hotels, street food";
+    if (budget[0] <= 50) return "Mid-range hotels, mix of dining options";
+    if (budget[0] <= 75) return "Premium hotels, fine dining experiences";
+    return "Luxury accommodations, exclusive experiences";
   };
 
   const handleDirectBudgetChange = (value: string) => {
-    // Only allow numbers
-    const numericValue = value.replace(/[^0-9]/g, "");
-    setDirectBudget(numericValue);
-
-    // Update slider position based on direct input
-    if (numericValue) {
-      const amount = parseInt(numericValue);
-      if (amount <= 1500) setBudget([25]);
-      else if (amount <= 3000) setBudget([50]);
-      else if (amount <= 5000) setBudget([75]);
-      else setBudget([100]);
-    }
+    setDirectBudget(value);
+    // Update slider based on direct budget
+    const amount = parseInt(value);
+    if (amount <= 1500) setBudget([25]);
+    else if (amount <= 3000) setBudget([50]);
+    else if (amount <= 5000) setBudget([75]);
+    else setBudget([100]);
   };
 
   const handleSliderChange = (value: number[]) => {
@@ -157,30 +159,63 @@ export function TripBuilder({ onComplete }: TripBuilderProps) {
     setTimeout(() => {
       setIsGenerating(false);
       setPrompt(
-        `Create a ${getBudgetLabel().toLowerCase()} ${travelers} trip to ${destination} for ${getTravelersCount()} travelers`
+        `Create a ${getBudgetLabel()} ${travelers} trip to ${destination} for ${getTravelersCount()} travelers`
       );
       toast.success("AI prompt generated successfully!");
     }, 2000);
   };
 
-  const handleCreateTrip = () => {
+  const handleCreateTrip = async () => {
+    if (!tripName.trim()) {
+      toast.error("Please enter a trip name");
+      return;
+    }
+
+    if (!destination.trim()) {
+      toast.error("Please enter a destination");
+      return;
+    }
+
+    if (!dateRange.from || !dateRange.to) {
+      toast.error("Please select travel dates");
+      return;
+    }
+
     if (!prompt) {
       toast.error("Please generate an AI prompt first");
       return;
     }
 
-    const tripData = {
-      destination,
-      travelers: getTravelersCount(),
-      travelerType: travelers,
-      startDate: dateRange.from ? format(dateRange.from, "MMM dd, yyyy") : "",
-      endDate: dateRange.to ? format(dateRange.to, "MMM dd, yyyy") : "",
-      budget: getBudgetLabel(),
-      prompt,
-    };
+    setIsCreating(true);
 
-    toast.success("Trip created successfully!");
-    onComplete(tripData);
+    try {
+      const tripData: CreateTripData = {
+        name: tripName,
+        destination: destination,
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+        travelers: {
+          count: getTravelersCount(),
+          type: travelers,
+        },
+        budget: {
+          amount: getBudgetAmount(),
+          currency: "USD",
+          type: getBudgetLabel() as any,
+        },
+        description: prompt,
+        tags: [travelers, getBudgetLabel()],
+      };
+
+      const createdTrip = await tripService.createTrip(tripData);
+
+      toast.success("Trip created successfully!");
+      onComplete(createdTrip);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create trip");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -218,75 +253,116 @@ export function TripBuilder({ onComplete }: TripBuilderProps) {
             <CardContent className="pt-6">
               <div className="space-y-6">
                 <h3 className="text-xl font-medium text-center">
-                  Who's traveling with you?
+                  Let's start planning your trip
                 </h3>
 
-                <RadioGroup
-                  value={travelers}
-                  onValueChange={(v) => setTravelers(v as any)}
-                  className="grid grid-cols-1 md:grid-cols-3 gap-4"
-                >
+                <div className="space-y-4">
                   <div>
-                    <RadioGroupItem
-                      value="solo"
-                      id="solo"
-                      className="peer sr-only"
-                    />
-                    <Label
-                      htmlFor="solo"
-                      className="flex flex-col items-center justify-center rounded-md border-2 border-muted p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-turquoise-500 peer-data-[state=checked]:bg-turquoise-50 cursor-pointer transition-all"
-                    >
-                      <User className="mb-3 h-6 w-6" />
-                      <p className="font-medium">Just Me</p>
-                      <p className="text-sm text-muted-foreground">
-                        Solo traveler
-                      </p>
+                    <Label htmlFor="tripName" className="text-sm font-medium">
+                      Trip Name
                     </Label>
+                    <input
+                      id="tripName"
+                      type="text"
+                      placeholder="e.g., Summer in Paris, Tokyo Adventure"
+                      value={tripName}
+                      onChange={(e) => setTripName(e.target.value)}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-turquoise-500 focus:border-transparent"
+                    />
                   </div>
 
                   <div>
-                    <RadioGroupItem
-                      value="couple"
-                      id="couple"
-                      className="peer sr-only"
-                    />
                     <Label
-                      htmlFor="couple"
-                      className="flex flex-col items-center justify-center rounded-md border-2 border-muted p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-turquoise-500 peer-data-[state=checked]:bg-turquoise-50 cursor-pointer transition-all"
+                      htmlFor="destination"
+                      className="text-sm font-medium"
                     >
-                      <Heart className="mb-3 h-6 w-6" />
-                      <p className="font-medium">Couple</p>
-                      <p className="text-sm text-muted-foreground">
-                        2 travelers
-                      </p>
+                      Destination
                     </Label>
-                  </div>
-
-                  <div>
-                    <RadioGroupItem
-                      value="family"
-                      id="family"
-                      className="peer sr-only"
+                    <input
+                      id="destination"
+                      type="text"
+                      placeholder="Where are you going?"
+                      value={destination}
+                      onChange={(e) => setDestination(e.target.value)}
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-turquoise-500 focus:border-transparent"
                     />
-                    <Label
-                      htmlFor="family"
-                      className="flex flex-col items-center justify-center rounded-md border-2 border-muted p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-turquoise-500 peer-data-[state=checked]:bg-turquoise-50 cursor-pointer transition-all"
-                    >
-                      <Home className="mb-3 h-6 w-6" />
-                      <p className="font-medium">Family</p>
-                      <p className="text-sm text-muted-foreground">
-                        3+ travelers
-                      </p>
-                    </Label>
                   </div>
-                </RadioGroup>
+                </div>
 
-                <Button
-                  onClick={moveToNextTab}
-                  className="bg-turquoise-500 hover:bg-turquoise-600 text-white w-full mt-4"
-                >
-                  Continue <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <div>
+                  <h4 className="text-lg font-medium mb-4">
+                    Who's traveling with you?
+                  </h4>
+                  <RadioGroup
+                    value={travelers}
+                    onValueChange={(v) => setTravelers(v as any)}
+                    className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                  >
+                    <div>
+                      <RadioGroupItem
+                        value="solo"
+                        id="solo"
+                        className="peer sr-only"
+                      />
+                      <Label
+                        htmlFor="solo"
+                        className="flex flex-col items-center justify-center rounded-md border-2 border-muted p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-turquoise-500 peer-data-[state=checked]:bg-turquoise-50 cursor-pointer transition-all"
+                      >
+                        <User className="mb-3 h-6 w-6" />
+                        <p className="font-medium">Just Me</p>
+                        <p className="text-sm text-muted-foreground">
+                          Solo traveler
+                        </p>
+                      </Label>
+                    </div>
+
+                    <div>
+                      <RadioGroupItem
+                        value="couple"
+                        id="couple"
+                        className="peer sr-only"
+                      />
+                      <Label
+                        htmlFor="couple"
+                        className="flex flex-col items-center justify-center rounded-md border-2 border-muted p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-turquoise-500 peer-data-[state=checked]:bg-turquoise-50 cursor-pointer transition-all"
+                      >
+                        <Heart className="mb-3 h-6 w-6" />
+                        <p className="font-medium">Couple</p>
+                        <p className="text-sm text-muted-foreground">
+                          2 travelers
+                        </p>
+                      </Label>
+                    </div>
+
+                    <div>
+                      <RadioGroupItem
+                        value="family"
+                        id="family"
+                        className="peer sr-only"
+                      />
+                      <Label
+                        htmlFor="family"
+                        className="flex flex-col items-center justify-center rounded-md border-2 border-muted p-6 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-turquoise-500 peer-data-[state=checked]:bg-turquoise-50 cursor-pointer transition-all"
+                      >
+                        <Users className="mb-3 h-6 w-6" />
+                        <p className="font-medium">Family</p>
+                        <p className="text-sm text-muted-foreground">
+                          4+ travelers
+                        </p>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                <div className="flex justify-end">
+                  <Button
+                    onClick={moveToNextTab}
+                    disabled={!tripName.trim() || !destination.trim()}
+                    className="bg-turquoise-500 hover:bg-turquoise-600 text-white"
+                  >
+                    Next <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -448,7 +524,9 @@ export function TripBuilder({ onComplete }: TripBuilderProps) {
                   <div className="mt-8 p-4 bg-turquoise-50 rounded-lg border border-turquoise-100">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium text-turquoise-900">
-                        {getBudgetLabel()} Travel
+                        {getBudgetLabel().charAt(0).toUpperCase() +
+                          getBudgetLabel().slice(1)}{" "}
+                        Travel
                       </h4>
                       <span className="text-sm font-medium text-turquoise-700">
                         {getBudgetRange()}
@@ -559,9 +637,18 @@ export function TripBuilder({ onComplete }: TripBuilderProps) {
                   <Button
                     onClick={handleCreateTrip}
                     className="bg-turquoise-500 hover:bg-turquoise-600 text-white flex-1"
-                    disabled={!prompt}
+                    disabled={!prompt || isCreating}
                   >
-                    Create Trip <ArrowRight className="ml-2 h-4 w-4" />
+                    {isCreating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating Trip...
+                      </>
+                    ) : (
+                      <>
+                        Create Trip <ArrowRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>

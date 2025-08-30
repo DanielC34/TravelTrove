@@ -1,175 +1,155 @@
-
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle } from "lucide-react";
-import { Navbar } from "@/components/Navbar";
-import { MobileNav } from "@/components/MobileNav";
-import { Footer } from "@/components/Footer";
-import { TripCard } from "@/components/TripCard";
-import { EmptyTrips } from "@/components/EmptyTrips";
-import { TripBuilder } from "@/components/TripBuilder";
-
-const mockTrips = [
-  {
-    id: 1,
-    destination: "Las Vegas",
-    startDate: "Jul 24",
-    endDate: "Jul 26, 2024",
-    travelers: 2,
-    progress: 65,
-    imageSrc: "https://images.unsplash.com/photo-1605833556294-ea5c7a74f57d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2148&q=80"
-  },
-  {
-    id: 2,
-    destination: "Paris",
-    startDate: "Aug 10",
-    endDate: "Aug 17, 2024",
-    travelers: 2,
-    progress: 40,
-    imageSrc: "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2020&q=80"
-  },
-  {
-    id: 3,
-    destination: "Tokyo",
-    startDate: "Oct 5",
-    endDate: "Oct 15, 2024",
-    travelers: 1,
-    progress: 20,
-    imageSrc: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1788&q=80"
-  },
-];
+import React from "react";
+import { Link } from "react-router-dom";
+import {
+  FaPlus,
+  FaMapMarkedAlt,
+  FaCalendarAlt,
+  FaUsers,
+  FaDollarSign,
+  FaEye,
+} from "react-icons/fa";
 
 const Trips = () => {
-  const [trips, setTrips] = useState(mockTrips);
-  const [showTripBuilder, setShowTripBuilder] = useState(false);
-  
-  const handleViewTrip = (id: number) => {
-    // In a real app, this would navigate to a trip detail page
-    console.log("View trip:", id);
+  const trips = [
+    {
+      id: "1",
+      name: "Paris Adventure",
+      destination: "Paris, France",
+      startDate: "2024-03-15",
+      endDate: "2024-03-22",
+      status: "confirmed",
+      budget: 2500,
+      travelers: 2,
+      image:
+        "https://images.unsplash.com/photo-1502602898536-47ad22581b52?w=400",
+    },
+    {
+      id: "2",
+      name: "Tokyo Exploration",
+      destination: "Tokyo, Japan",
+      startDate: "2024-04-10",
+      endDate: "2024-04-17",
+      status: "planning",
+      budget: 3200,
+      travelers: 1,
+      image:
+        "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400",
+    },
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return "bg-green-100 text-green-800";
+      case "planning":
+        return "bg-yellow-100 text-yellow-800";
+      case "completed":
+        return "bg-blue-100 text-blue-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
-  
-  const handleCreateTrip = () => {
-    setShowTripBuilder(true);
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
-  
-  const handleTripComplete = (tripData: any) => {
-    // In a real app, this would call an API to save the trip
-    const newTrip = {
-      id: trips.length + 1,
-      destination: tripData.destination,
-      startDate: tripData.date.split(',')[0],
-      endDate: tripData.date,
-      travelers: tripData.travelers,
-      progress: 10,
-      // Add default image source for new trips
-      imageSrc: "https://images.unsplash.com/photo-1488085061387-422e29b40080?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2348&q=80"
-    };
-    
-    setTrips([...trips, newTrip]);
-    setShowTripBuilder(false);
-  };
-  
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-1 pt-24 pb-16 md:pt-28 bg-gray-50">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold">My Trips</h1>
-              <p className="text-gray-600 mt-1">Manage and plan your upcoming adventures</p>
+              <h1 className="text-3xl font-bold text-gray-900">My Trips</h1>
+              <p className="text-gray-600 mt-2">
+                Manage and organize your travel adventures
+              </p>
             </div>
-            
-            <Button 
-              className="mt-4 md:mt-0 bg-turquoise-500 hover:bg-turquoise-600 text-white"
-              onClick={handleCreateTrip}
+            <Link
+              to="/trips/new"
+              className="mt-4 sm:mt-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
             >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Create New Trip
-            </Button>
+              <FaPlus />
+              <span>Create New Trip</span>
+            </Link>
           </div>
-          
-          <Tabs defaultValue="upcoming" className="mt-6">
-            <TabsList className="mb-8">
-              <TabsTrigger 
-                value="upcoming" 
-                className="data-[state=active]:bg-turquoise-50 data-[state=active]:text-turquoise-700"
-              >
-                Upcoming
-              </TabsTrigger>
-              <TabsTrigger 
-                value="past" 
-                className="data-[state=active]:bg-turquoise-50 data-[state=active]:text-turquoise-700"
-              >
-                Past Trips
-              </TabsTrigger>
-              <TabsTrigger 
-                value="drafts" 
-                className="data-[state=active]:bg-turquoise-50 data-[state=active]:text-turquoise-700"
-              >
-                Drafts
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="upcoming" className="mt-0 animate-fade-in">
-              {trips.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {trips.map((trip) => (
-                    <TripCard
-                      key={trip.id}
-                      destination={trip.destination}
-                      startDate={trip.startDate}
-                      endDate={trip.endDate}
-                      travelers={trip.travelers}
-                      progress={trip.progress}
-                      imageSrc={trip.imageSrc}
-                      onViewTrip={() => handleViewTrip(trip.id)}
-                    />
-                  ))}
+        </div>
+
+        {/* Trips Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {trips.map((trip) => (
+            <div
+              key={trip.id}
+              className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300"
+            >
+              <div className="relative">
+                <img
+                  src={trip.image}
+                  alt={trip.destination}
+                  className="w-full h-48 object-cover"
+                />
+                <div className="absolute bottom-4 left-4">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                      trip.status
+                    )}`}
+                  >
+                    {trip.status}
+                  </span>
                 </div>
-              ) : (
-                <EmptyTrips onCreateTrip={handleCreateTrip} />
-              )}
-            </TabsContent>
-            
-            <TabsContent value="past" className="mt-0 animate-fade-in">
-              <EmptyTrips onCreateTrip={handleCreateTrip} />
-            </TabsContent>
-            
-            <TabsContent value="drafts" className="mt-0 animate-fade-in">
-              <EmptyTrips onCreateTrip={handleCreateTrip} />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </main>
-      
-      {/* Trip Builder Modal */}
-      {showTripBuilder && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-auto">
-            <div className="p-6 flex justify-between items-center border-b">
-              <h2 className="text-2xl font-semibold">Build Your Trip</h2>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setShowTripBuilder(false)}
-              >
-                <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </Button>
+              </div>
+
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  {trip.name}
+                </h3>
+                <p className="text-gray-600 flex items-center space-x-1 mb-3">
+                  <FaMapMarkedAlt className="text-blue-600" />
+                  <span>{trip.destination}</span>
+                </p>
+
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <FaCalendarAlt className="text-blue-600" />
+                      <span>
+                        {formatDate(trip.startDate)} -{" "}
+                        {formatDate(trip.endDate)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <FaUsers className="text-green-600" />
+                      <span>
+                        {trip.travelers} traveler{trip.travelers > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2 text-gray-600">
+                      <FaDollarSign className="text-yellow-600" />
+                      <span>${trip.budget.toLocaleString()}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Link
+                  to={`/trips/${trip.id}`}
+                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center text-sm font-medium flex items-center justify-center space-x-2"
+                >
+                  <FaEye />
+                  <span>View Details</span>
+                </Link>
+              </div>
             </div>
-            <div className="p-6">
-              <TripBuilder onComplete={handleTripComplete} />
-            </div>
-          </div>
+          ))}
         </div>
-      )}
-      
-      <Footer />
-      <MobileNav />
+      </div>
     </div>
   );
 };
