@@ -3,13 +3,21 @@ import { Trip } from "../models/trip.model";
 import { Itinerary } from "../models/itinerary.model";
 import { openaiService } from "../services/openai.service";
 
+// Define the authenticated request type
+type AuthenticatedRequest = Request & {
+  user?: {
+    id: string;
+    email?: string;
+    name?: string;
+  };
+};
+
 export const aiController = {
   // Generate itinerary for a trip
-  async generateItinerary(req: Request, res: Response) {
+  async generateItinerary(req: AuthenticatedRequest, res: Response) {
     try {
       const { tripId } = req.params;
-      // const userId = req.user?.id;
-      const userId = "temp-user-id"; // Temporary fix
+      const userId = req.user?.id;
 
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
@@ -24,21 +32,24 @@ export const aiController = {
       // Check if itinerary already exists
       const existingItinerary = await Itinerary.findOne({ tripId });
       if (existingItinerary) {
-        return res.status(400).json({ message: "Itinerary already exists for this trip" });
+        return res
+          .status(400)
+          .json({ message: "Itinerary already exists for this trip" });
       }
 
       // Check if OpenAI API key is configured
       if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ 
-          message: "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables." 
+        return res.status(500).json({
+          message:
+            "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.",
         });
       }
 
       // Generate itinerary using OpenAI
       const itineraryData = await openaiService.generateItinerary({
         destination: trip.destination,
-        startDate: trip.startDate.toISOString().split('T')[0],
-        endDate: trip.endDate.toISOString().split('T')[0],
+        startDate: trip.startDate.toISOString().split("T")[0],
+        endDate: trip.endDate.toISOString().split("T")[0],
         travelers: trip.travelers,
         budget: trip.budget,
       });
@@ -55,30 +66,30 @@ export const aiController = {
       res.status(201).json(savedItinerary);
     } catch (error: any) {
       console.error("Error generating itinerary:", error);
-      
+
       // Handle specific OpenAI errors
       if (error.message.includes("OpenAI API key")) {
-        return res.status(500).json({ 
-          message: "AI service not configured. Please check your OpenAI API key." 
+        return res.status(500).json({
+          message:
+            "AI service not configured. Please check your OpenAI API key.",
         });
       }
-      
+
       if (error.message.includes("Invalid response format")) {
-        return res.status(500).json({ 
-          message: "AI generated invalid response. Please try again." 
+        return res.status(500).json({
+          message: "AI generated invalid response. Please try again.",
         });
       }
-      
+
       res.status(500).json({ message: "Error generating itinerary" });
     }
   },
 
   // Regenerate itinerary
-  async regenerateItinerary(req: Request, res: Response) {
+  async regenerateItinerary(req: AuthenticatedRequest, res: Response) {
     try {
       const { tripId } = req.params;
-      // const userId = req.user?.id;
-      const userId = "temp-user-id"; // Temporary fix
+      const userId = req.user?.id; // SECURITY FIX: Use actual authenticated user
 
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
@@ -92,8 +103,9 @@ export const aiController = {
 
       // Check if OpenAI API key is configured
       if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ 
-          message: "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables." 
+        return res.status(500).json({
+          message:
+            "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.",
         });
       }
 
@@ -103,8 +115,8 @@ export const aiController = {
       // Generate new itinerary using OpenAI
       const itineraryData = await openaiService.generateItinerary({
         destination: trip.destination,
-        startDate: trip.startDate.toISOString().split('T')[0],
-        endDate: trip.endDate.toISOString().split('T')[0],
+        startDate: trip.startDate.toISOString().split("T")[0],
+        endDate: trip.endDate.toISOString().split("T")[0],
         travelers: trip.travelers,
         budget: trip.budget,
       });
@@ -122,20 +134,21 @@ export const aiController = {
       res.json(savedItinerary);
     } catch (error: any) {
       console.error("Error regenerating itinerary:", error);
-      
+
       // Handle specific OpenAI errors
       if (error.message.includes("OpenAI API key")) {
-        return res.status(500).json({ 
-          message: "AI service not configured. Please check your OpenAI API key." 
+        return res.status(500).json({
+          message:
+            "AI service not configured. Please check your OpenAI API key.",
         });
       }
-      
+
       if (error.message.includes("Invalid response format")) {
-        return res.status(500).json({ 
-          message: "AI generated invalid response. Please try again." 
+        return res.status(500).json({
+          message: "AI generated invalid response. Please try again.",
         });
       }
-      
+
       res.status(500).json({ message: "Error regenerating itinerary" });
     }
   },
@@ -151,8 +164,9 @@ export const aiController = {
 
       // Check if OpenAI API key is configured
       if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ 
-          message: "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables." 
+        return res.status(500).json({
+          message:
+            "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.",
         });
       }
 
@@ -166,20 +180,21 @@ export const aiController = {
       res.json(suggestionsData);
     } catch (error: any) {
       console.error("Error getting activity suggestions:", error);
-      
+
       // Handle specific OpenAI errors
       if (error.message.includes("OpenAI API key")) {
-        return res.status(500).json({ 
-          message: "AI service not configured. Please check your OpenAI API key." 
+        return res.status(500).json({
+          message:
+            "AI service not configured. Please check your OpenAI API key.",
         });
       }
-      
+
       if (error.message.includes("Invalid response format")) {
-        return res.status(500).json({ 
-          message: "AI generated invalid response. Please try again." 
+        return res.status(500).json({
+          message: "AI generated invalid response. Please try again.",
         });
       }
-      
+
       res.status(500).json({ message: "Error getting activity suggestions" });
     }
   },
@@ -195,8 +210,9 @@ export const aiController = {
 
       // Check if OpenAI API key is configured
       if (!process.env.OPENAI_API_KEY) {
-        return res.status(500).json({ 
-          message: "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables." 
+        return res.status(500).json({
+          message:
+            "OpenAI API key not configured. Please add OPENAI_API_KEY to your environment variables.",
         });
       }
 
@@ -210,20 +226,21 @@ export const aiController = {
       res.json(recommendationsData);
     } catch (error: any) {
       console.error("Error getting travel recommendations:", error);
-      
+
       // Handle specific OpenAI errors
       if (error.message.includes("OpenAI API key")) {
-        return res.status(500).json({ 
-          message: "AI service not configured. Please check your OpenAI API key." 
+        return res.status(500).json({
+          message:
+            "AI service not configured. Please check your OpenAI API key.",
         });
       }
-      
+
       if (error.message.includes("Invalid response format")) {
-        return res.status(500).json({ 
-          message: "AI generated invalid response. Please try again." 
+        return res.status(500).json({
+          message: "AI generated invalid response. Please try again.",
         });
       }
-      
+
       res.status(500).json({ message: "Error getting travel recommendations" });
     }
   },

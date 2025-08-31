@@ -6,7 +6,11 @@ import UserPreferencesModel from "../models/preferences.model";
 
 // Extend Request type to include user
 interface AuthRequest extends Request {
-  user?: { _id: mongoose.Types.ObjectId };
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
 describe("Preferences Controller", () => {
@@ -47,7 +51,11 @@ describe("Preferences Controller", () => {
     // Reset mocks
     vi.clearAllMocks();
     // Set up request user
-    mockRequest.user = { _id: mockUserId };
+    mockRequest.user = { 
+      id: mockUserId.toString(),
+      name: "Test User",
+      email: "test@example.com"
+    };
   });
 
   describe("getPreferences", () => {

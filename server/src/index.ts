@@ -9,12 +9,49 @@ import { authRouter } from "./routes/auth.routes";
 import { preferencesRouter } from "./routes/preferences.routes";
 import { tripRouter } from "./routes/trip.routes";
 import { aiRouter } from "./routes/ai.routes";
+import { globalErrorHandler } from "./utils/errorHandler";
+
+// Validate required environment variables
+const requiredEnvVars = ["JWT_SECRET", "MONGODB_URI"];
+const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+
+if (missingEnvVars.length > 0) {
+  console.error("❌ CRITICAL: Missing required environment variables:");
+  missingEnvVars.forEach(varName => {
+    console.error(`   - ${varName}`);
+  });
+  console.error("   Please check your .env file and ensure all required variables are set.");
+  process.exit(1);
+}
+
+// Validate JWT_SECRET strength
+const JWT_SECRET = process.env.JWT_SECRET!;
+if (JWT_SECRET.length < 32) {
+  console.error("❌ CRITICAL: JWT_SECRET is too weak!");
+  console.error("   JWT_SECRET should be at least 32 characters long.");
+  console.error("   Current length:", JWT_SECRET.length);
+  process.exit(1);
+}
 
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Security middleware
+app.use(cors({
+  origin: process.env.CLIENT_URL || "http://localhost:3000",
+  credentials: true,
+}));
+
+// Body parsing middleware
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Request logging middleware (development only)
+if (process.env.NODE_ENV === "development") {
+  app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    next();
+  });
+}
 
 // Health check endpoint
 app.get("/health", (req, res) => {
@@ -22,8 +59,9 @@ app.get("/health", (req, res) => {
     status: "OK",
     message: "Travel Trove API is running",
     timestamp: new Date().toISOString(),
-    mongodb:
-      mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    environment: process.env.NODE_ENV || "development",
+    mongodb: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    version: process.env.npm_package_version || "1.0.0",
   });
 });
 
@@ -35,34 +73,51 @@ app.get("/test", (req, res) => {
   });
 });
 
-// Routes
+// API routes
 app.use("/api/auth", authRouter);
 app.use("/api/preferences", preferencesRouter);
 app.use("/api/trips", tripRouter);
 app.use("/api/ai", aiRouter);
 
-// Start server first
+// 404 handler for undefined routes
+app.use("*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    error: {
+      type: "NOT_FOUND_ERROR",
+      message: `Route ${req.originalUrl} not found`,
+      code: "RES_001",
+      timestamp: new Date().toISOString(),
+      path: req.path,
+    },
+  });
+});
+
+// Global error handler (must be last)
+app.use(globalErrorHandler);
+
+// Start server
 const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`🧪 Test endpoint: http://localhost:${PORT}/test`);
   console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log("");
   console.log("🎯 Ready to accept requests!");
 });
 
 // MongoDB connection (non-blocking)
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://localhost:27017/travel-trove";
+const MONGODB_URI = process.env.MONGODB_URI!;
 
 console.log("🔌 Attempting to connect to MongoDB...");
-console.log("📍 URI:", MONGODB_URI);
+console.log("📍 URI:", MONGODB_URI.replace(/\/\/[^:]+:[^@]+@/, "//***:***@")); // Hide credentials in logs
 
 mongoose
   .connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-    socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
   })
   .then(() => {
     console.log("✅ Connected to MongoDB successfully!");
@@ -79,3 +134,26 @@ mongoose
     console.log("🔄 Server will continue without database connection...");
     console.log("⚠️  Some features may not work without MongoDB");
   });
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  console.log("🛑 SIGTERM received, shutting down gracefully...");
+  server.close(() => {
+    console.log("✅ Server closed");
+    mongoose.connection.close().then(() => {
+      console.log("✅ MongoDB connection closed");
+      process.exit(0);
+    });
+  });
+});
+
+process.on("SIGINT", () => {
+  console.log("🛑 SIGINT received, shutting down gracefully...");
+  server.close(() => {
+    console.log("✅ Server closed");
+    mongoose.connection.close().then(() => {
+      console.log("✅ MongoDB connection closed");
+      process.exit(0);
+    });
+  });
+});

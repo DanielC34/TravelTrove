@@ -102,7 +102,7 @@ const Explore = () => {
       selectedCategory === "all" || destination.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
-
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -114,8 +114,8 @@ const Explore = () => {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Discover amazing places around the world and start planning your
             next adventure
-          </p>
-        </div>
+            </p>
+          </div>
 
         {/* Search and Filters */}
         <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 mb-8">
