@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { IUser } from "../models/user.model";
+import { Document } from "mongoose";
 
 // JWT payload interface
 export interface JWTPayload {
@@ -26,7 +27,7 @@ export class JWTService {
   /**
    * Generate JWT token for user
    */
-  static generateToken(user: IUser): string {
+  static generateToken(user: IUser & Document): string {
     if (!JWT_SECRET) {
       throw new Error("JWT_SECRET is not configured");
     }
@@ -46,7 +47,7 @@ export class JWTService {
   /**
    * Generate refresh token for user
    */
-  static generateRefreshToken(user: IUser): string {
+  static generateRefreshToken(user: IUser & Document): string {
     if (!JWT_SECRET) {
       throw new Error("JWT_SECRET is not configured");
     }

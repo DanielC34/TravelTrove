@@ -1,56 +1,93 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, model, Model, HydratedDocument } from "mongoose";
 import bcrypt from "bcryptjs";
 
-export interface IUser extends mongoose.Document {
-  name: string;
+/* ---------- Types ---------- */
+type Provider = "local" | "google" | "facebook";
+
+export interface IUser {
   email: string;
-  password: string;
+  passwordHash: string;
+  name: string;
+  providers: Provider[];
+  createdAt?: Date; // provided by timestamps
+  updatedAt?: Date;
+}
+
+interface IUserMethods {
   comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const userSchema = new mongoose.Schema<IUser>(
+type UserDocument = HydratedDocument<IUser, IUserMethods>;
+type UserModel = Model<IUser, {}, IUserMethods>;
+
+/* ---------- Schema ---------- */
+const SALT_ROUNDS = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10", 10);
+
+const userSchema = new Schema<IUser, UserModel, IUserMethods>(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     email: {
       type: String,
-      required: true,
+      required: [true, "Email is required"],
       unique: true,
-      trim: true,
       lowercase: true,
+      trim: true,
+      // optional: basic email pattern
+      match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
     },
-    password: {
+    passwordHash: {
       type: String,
-      required: true,
-      minlength: 6,
+      required: [true, "Password is required"],
     },
+    name: {
+      type: String,
+      required: [true, "Name is required"],
+      trim: true,
+    },
+    providers: {
+      type: [String],
+      enum: ["local", "google", "facebook"],
+      default: ["local"],
+    },
+    // removed explicit createdAt since timestamps:true adds it
   },
   {
     timestamps: true,
   }
 );
 
-// Hash password before saving
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+/* unique index explicitly */
+userSchema.index({ email: 1 }, { unique: true });
 
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error as Error);
-  }
+/* ---------- Middleware: hash password ---------- */
+/* NOTE: use typed 'this' and async middleware (no next callback) */
+userSchema.pre<UserDocument>("save", async function () {
+  if (!this.isModified("passwordHash")) return; // nothing to do
+  const salt = await bcrypt.genSalt(SALT_ROUNDS);
+  this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
 });
 
-// Method to compare password
+/* ---------- Instance method: comparePassword ---------- */
 userSchema.methods.comparePassword = async function (
   candidatePassword: string
 ): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
+  if (!this.passwordHash) return false;
+  try {
+    return await bcrypt.compare(candidatePassword, this.passwordHash);
+  } catch (err) {
+    // optionally log error
+    return false;
+  }
 };
 
-export const User = mongoose.model<IUser>("User", userSchema);
+/* ---------- Hide sensitive fields when returning JSON ---------- */
+userSchema.set("toJSON", {
+  transform: (doc, ret) => {
+    delete ret.passwordHash;
+    return ret;
+  },
+});
+
+/* ---------- Model export (safe for hot-reload / serverless) ---------- */
+export const User: UserModel =
+  (mongoose.models.User as UserModel) ||
+  model<IUser, UserModel>("User", userSchema);

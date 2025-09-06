@@ -1,32 +1,23 @@
+// src/middleware/auth.ts
 import { Request, Response, NextFunction } from "express";
-import { User, IUser } from "../models/user.model";
+import { User } from "../models/user.model";
 import JWTService from "../services/jwt.service";
-import { 
-  createAuthenticationError, 
-  createNotFoundError, 
+import {
+  createAuthenticationError,
+  createNotFoundError,
   ErrorCodes,
-  sendErrorResponse 
+  sendErrorResponse,
 } from "../utils/errorHandler";
-
-// Extend Express Request interface with user property
-interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-}
 
 /**
  * Authentication middleware - validates JWT token and sets user context
  */
 export const auth = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    // Extract token from Authorization header
     const authHeader = req.header("Authorization");
     const token = JWTService.extractTokenFromHeader(authHeader);
 
@@ -65,14 +56,14 @@ export const auth = async (
       return;
     }
 
-    // Set user context in request
+    // Set user context in request (typed globally in express.d.ts)
     req.user = {
       id: (user._id as any).toString(),
       name: user.name,
       email: user.email,
     };
 
-    // Add user info to response headers for debugging (remove in production)
+    // Debug headers (optional)
     if (process.env.NODE_ENV === "development") {
       res.setHeader("X-User-ID", (user._id as any).toString());
       res.setHeader("X-User-Email", user.email);
@@ -102,7 +93,7 @@ export const auth = async (
  * Optional authentication middleware - sets user context if token is valid
  */
 export const optionalAuth = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -111,16 +102,14 @@ export const optionalAuth = async (
     const token = JWTService.extractTokenFromHeader(authHeader);
 
     if (!token) {
-      // No token provided, continue without authentication
       next();
       return;
     }
 
-    // Try to verify token
     try {
       const payload = JWTService.verifyToken(token);
       const user = await User.findById(payload.userId).exec();
-      
+
       if (user) {
         req.user = {
           id: (user._id as any).toString(),
@@ -129,8 +118,7 @@ export const optionalAuth = async (
         };
       }
     } catch (jwtError) {
-      // Token is invalid, but we continue without authentication
-      console.warn("⚠️ Optional auth: Invalid token provided", {
+      console.warn("⚠️ Optional auth: Invalid token", {
         error: jwtError instanceof Error ? jwtError.message : "Unknown error",
         url: req.url,
         timestamp: new Date().toISOString(),
@@ -140,8 +128,7 @@ export const optionalAuth = async (
     next();
   } catch (error: any) {
     console.error("🔒 Optional authentication middleware error:", error);
-    // Continue without authentication on error
-    next();
+    next(); // allow request to continue
   }
 };
 
@@ -149,12 +136,11 @@ export const optionalAuth = async (
  * Resource ownership check middleware
  */
 export const checkOwnership = async (
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    // Ensure user is authenticated
     if (!req.user) {
       const error = createAuthenticationError(
         ErrorCodes.TOKEN_MISSING,
@@ -165,7 +151,6 @@ export const checkOwnership = async (
     }
 
     const resourceUserId = req.params.userId || req.body.userId;
-    
     if (!resourceUserId) {
       const error = createAuthenticationError(
         ErrorCodes.INVALID_INPUT,
@@ -175,7 +160,6 @@ export const checkOwnership = async (
       return;
     }
 
-    // Check if user owns the resource
     if (req.user.id !== resourceUserId.toString()) {
       const error = createAuthenticationError(
         ErrorCodes.INSUFFICIENT_PERMISSIONS,
@@ -207,12 +191,11 @@ export const checkOwnership = async (
  */
 export const requireRole = (allowedRoles: string[]) => {
   return async (
-    req: AuthRequest,
+    req: Request,
     res: Response,
     next: NextFunction
   ): Promise<void> => {
     try {
-      // Ensure user is authenticated
       if (!req.user) {
         const error = createAuthenticationError(
           ErrorCodes.TOKEN_MISSING,
@@ -222,7 +205,6 @@ export const requireRole = (allowedRoles: string[]) => {
         return;
       }
 
-      // Get user with roles from database
       const user = await User.findById(req.user.id).exec();
       if (!user) {
         const error = createNotFoundError("User");
@@ -230,10 +212,7 @@ export const requireRole = (allowedRoles: string[]) => {
         return;
       }
 
-      // Check if user has required role (assuming user has a role field)
-      // You can extend the User model to include roles if needed
-      const userRole = (user as any).role || "user"; // Default to "user" role
-      
+      const userRole = (user as any).role || "user";
       if (!allowedRoles.includes(userRole)) {
         const error = createAuthenticationError(
           ErrorCodes.INSUFFICIENT_PERMISSIONS,
@@ -263,27 +242,27 @@ export const requireRole = (allowedRoles: string[]) => {
 };
 
 /**
- * Rate limiting middleware (basic implementation)
+ * Rate limiting middleware
  */
-export const rateLimit = (maxRequests: number = 100, windowMs: number = 15 * 60 * 1000) => {
+export const rateLimit = (
+  maxRequests: number = 100,
+  windowMs: number = 15 * 60 * 1000
+) => {
   const requests = new Map<string, { count: number; resetTime: number }>();
 
   return (req: Request, res: Response, next: NextFunction): void => {
     const ip = req.ip || req.connection.remoteAddress || "unknown";
     const now = Date.now();
-    
+
     const userRequests = requests.get(ip);
-    
+
     if (!userRequests || now > userRequests.resetTime) {
-      // First request or window expired
       requests.set(ip, { count: 1, resetTime: now + windowMs });
       next();
     } else if (userRequests.count < maxRequests) {
-      // Within limit
       userRequests.count++;
       next();
     } else {
-      // Rate limit exceeded
       res.status(429).json({
         success: false,
         error: {
