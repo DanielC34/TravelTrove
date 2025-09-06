@@ -1,16 +1,12 @@
-import { JwtPayload } from "jsonwebtoken";
-
+// src/types/express.d.ts
 declare global {
   namespace Express {
-    // Define a more specific user type
-    interface User extends JwtPayload {
-      id: string;
-      email?: string;
-      name?: string;
-    }
-
     interface Request {
-      user?: User;
+      user?: {
+        id: string;
+        email?: string;
+        name?: string;
+      };
     }
   }
 }
