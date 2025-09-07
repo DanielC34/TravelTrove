@@ -62,7 +62,7 @@ export const tripService = {
   }): Promise<Trip[]> {
     try {
       const response = await api.get("/trips", { params });
-      return response.data;
+      return response.data.data || response.data || [];
     } catch (error) {
       console.error("Error fetching trips:", error);
       throw new Error("Failed to fetch trips");

@@ -26,7 +26,7 @@ const Trips = () => {
       setLoading(true);
       setError(null);
       const tripsData = await tripService.getTrips();
-      setTrips(tripsData);
+      setTrips(Array.isArray(tripsData) ? tripsData : []);
     } catch (err: any) {
       console.error("Error fetching trips:", err);
       setError(err.message || "Failed to load trips");
