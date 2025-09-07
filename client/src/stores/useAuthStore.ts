@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { toast } from "@/hooks/use-toast";
 
 interface User {
   id: string;
@@ -18,6 +19,7 @@ interface AuthState {
   logout: () => void;
   clearError: () => void;
   initialize: () => void;
+  setAuthData: (user: User, token: string) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -57,19 +59,27 @@ export const useAuthStore = create<AuthState>()(
           }
 
           set({
-            user: data.user,
-            token: data.token,
+            user: data.data.user,
+            token: data.data.token,
             isAuthenticated: true,
             isLoading: false,
             error: null,
           });
 
           // Store token in localStorage
-          localStorage.setItem("token", data.token);
+          localStorage.setItem("token", data.data.token);
+          
+          // Show success toast
+          toast({
+            title: "Welcome back!",
+            description: `Good to see you again, ${data.data.user.name}!`,
+            variant: "default",
+          });
         } catch (error: any) {
+          const errorMessage = error.message || "Login failed";
           set({
             isLoading: false,
-            error: error.message || "Login failed",
+            error: errorMessage,
           });
           throw error;
         }
@@ -97,19 +107,27 @@ export const useAuthStore = create<AuthState>()(
           }
 
           set({
-            user: data.user,
-            token: data.token,
+            user: data.data.user,
+            token: data.data.token,
             isAuthenticated: true,
             isLoading: false,
             error: null,
           });
 
           // Store token in localStorage
-          localStorage.setItem("token", data.token);
+          localStorage.setItem("token", data.data.token);
+          
+          // Show success toast
+          toast({
+            title: "Welcome to Travel Trove!",
+            description: `Account created successfully. Welcome aboard, ${data.data.user.name}!`,
+            variant: "default",
+          });
         } catch (error: any) {
+          const errorMessage = error.message || "Registration failed";
           set({
             isLoading: false,
-            error: error.message || "Registration failed",
+            error: errorMessage,
           });
           throw error;
         }
@@ -127,6 +145,16 @@ export const useAuthStore = create<AuthState>()(
 
       clearError: () => {
         set({ error: null });
+      },
+
+      setAuthData: (user: User, token: string) => {
+        set({
+          user,
+          token,
+          isAuthenticated: true,
+          error: null,
+        });
+        localStorage.setItem("token", token);
       },
     }),
     {
