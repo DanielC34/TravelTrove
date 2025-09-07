@@ -244,7 +244,7 @@ export const googleCallback = async (req: Request, res: Response): Promise<void>
       id: user._id,
       email: user.email,
       name: user.name
-    }))}`);;
+    }))}`);
   } catch (error: any) {
     console.error("❌ Google callback error:", error);
     res.redirect(`${process.env.CLIENT_URL}/auth?error=oauth_failed`);
