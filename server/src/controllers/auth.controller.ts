@@ -2,6 +2,7 @@
 import { Request, Response } from "express";
 import { User } from "../models/user.model";
 import JWTService from "../services/jwt.service";
+import passport from "passport";
 import {
   createAuthenticationError,
   createValidationError,
@@ -222,5 +223,30 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
       "Logout failed"
     );
     sendErrorResponse(res, authError, req.path);
+  }
+};
+
+/**
+ * Google OAuth success callback
+ */
+export const googleCallback = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.redirect(`${process.env.CLIENT_URL}/auth?error=oauth_failed`);
+      return;
+    }
+
+    const user = req.user as any;
+    const token = JWTService.generateToken(user);
+    
+    // Redirect to frontend with token
+    res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}&user=${encodeURIComponent(JSON.stringify({
+      id: user._id,
+      email: user.email,
+      name: user.name
+    }))}`);;
+  } catch (error: any) {
+    console.error("❌ Google callback error:", error);
+    res.redirect(`${process.env.CLIENT_URL}/auth?error=oauth_failed`);
   }
 };
