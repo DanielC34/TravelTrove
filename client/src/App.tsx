@@ -15,6 +15,8 @@ import TripDetail from "./pages/TripDetail";
 import Explore from "./pages/Explore";
 import Auth from "./pages/Auth";
 import AuthCallback from "./pages/AuthCallback";
+import MapTest from "./pages/MapTest";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -75,6 +77,22 @@ const App = () => {
                 element={
                   <ProtectedRoute>
                     <Explore />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/map-test"
+                element={
+                  <ProtectedRoute>
+                    <MapTest />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/analytics"
+                element={
+                  <ProtectedRoute>
+                    <Analytics />
                   </ProtectedRoute>
                 }
               />

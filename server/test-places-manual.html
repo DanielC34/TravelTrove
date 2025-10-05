@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Places API Manual Testing</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+      button {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 5px;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      input,
+      textarea {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .result {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 10px;
+        margin: 10px 0;
+        white-space: pre-wrap;
+        font-family: monospace;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+      .error {
+        background: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+      }
+      .success {
+        background: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>🧪 Places API Manual Testing (OSM/Nominatim)</h1>
+
+    <div class="container">
+      <h2>🔐 Authentication</h2>
+      <p>First, you need to log in to get an authentication token:</p>
+      <input
+        type="email"
+        id="email"
+        placeholder="Email"
+        value="test@example.com"
+      />
+      <input
+        type="password"
+        id="password"
+        placeholder="Password"
+        value="password123"
+      />
+      <button onclick="login()">Login</button>
+      <div id="authResult" class="result" style="display: none"></div>
+    </div>
+
+    <div class="container">
+      <h2>🔍 Places Search</h2>
+      <input
+        type="text"
+        id="searchQuery"
+        placeholder="Search query"
+        value="paris"
+      />
+      <input
+        type="number"
+        id="searchLimit"
+        placeholder="Limit"
+        value="3"
+        min="1"
+        max="50"
+      />
+      <button onclick="searchPlaces()">Search Places</button>
+      <div id="searchResult" class="result" style="display: none"></div>
+    </div>
+
+    <div class="container">
+      <h2>📍 Place Details</h2>
+      <input
+        type="text"
+        id="placeId"
+        placeholder="Place ID (from search results)"
+      />
+      <button onclick="getPlaceDetails()">Get Place Details</button>
+      <div id="detailsResult" class="result" style="display: none"></div>
+    </div>
+
+    <div class="container">
+      <h2>📋 Instructions</h2>
+      <ol>
+        <li>
+          <strong>Login:</strong> Enter your credentials and click "Login" to
+          get an authentication token
+        </li>
+        <li>
+          <strong>Search:</strong> Enter a search query and click "Search
+          Places" to find locations
+        </li>
+        <li>
+          <strong>Details:</strong> Copy a place ID from search results and
+          click "Get Place Details"
+        </li>
+      </ol>
+      <p>
+        <strong>Note:</strong> Make sure your server is running on
+        <code>http://localhost:3001</code>
+      </p>
+    </div>
+
+    <script>
+      let authToken = null;
+      const API_BASE = "http://localhost:3001/api";
+
+      async function login() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const resultDiv = document.getElementById("authResult");
+
+        try {
+          const response = await fetch(`${API_BASE}/auth/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email, password }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            authToken = data.data.token;
+            resultDiv.className = "result success";
+            resultDiv.textContent = `✅ Login successful!\nToken: ${authToken.substring(
+              0,
+              50
+            )}...`;
+            resultDiv.style.display = "block";
+          } else {
+            throw new Error(data.error?.message || "Login failed");
+          }
+        } catch (error) {
+          resultDiv.className = "result error";
+          resultDiv.textContent = `❌ Login failed: ${error.message}`;
+          resultDiv.style.display = "block";
+        }
+      }
+
+      async function searchPlaces() {
+        if (!authToken) {
+          alert("Please login first!");
+          return;
+        }
+
+        const query = document.getElementById("searchQuery").value;
+        const limit = document.getElementById("searchLimit").value;
+        const resultDiv = document.getElementById("searchResult");
+
+        try {
+          const response = await fetch(
+            `${API_BASE}/places/search?q=${encodeURIComponent(
+              query
+            )}&limit=${limit}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          const data = await response.json();
+
+          if (data.success) {
+            resultDiv.className = "result success";
+            resultDiv.textContent = `✅ Search successful!\n\nResults (${
+              data.data.results.length
+            }):\n${JSON.stringify(data.data, null, 2)}`;
+            resultDiv.style.display = "block";
+
+            // Auto-fill place ID for details testing
+            if (data.data.results.length > 0) {
+              document.getElementById("placeId").value =
+                data.data.results[0].id;
+            }
+          } else {
+            throw new Error(data.error?.message || "Search failed");
+          }
+        } catch (error) {
+          resultDiv.className = "result error";
+          resultDiv.textContent = `❌ Search failed: ${error.message}`;
+          resultDiv.style.display = "block";
+        }
+      }
+
+      async function getPlaceDetails() {
+        if (!authToken) {
+          alert("Please login first!");
+          return;
+        }
+
+        const placeId = document.getElementById("placeId").value;
+        if (!placeId) {
+          alert("Please enter a place ID!");
+          return;
+        }
+
+        const resultDiv = document.getElementById("detailsResult");
+
+        try {
+          const response = await fetch(`${API_BASE}/places/${placeId}`, {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            resultDiv.className = "result success";
+            resultDiv.textContent = `✅ Place details retrieved!\n\nDetails:\n${JSON.stringify(
+              data.data,
+              null,
+              2
+            )}`;
+            resultDiv.style.display = "block";
+          } else {
+            throw new Error(
+              data.error?.message || "Failed to get place details"
+            );
+          }
+        } catch (error) {
+          resultDiv.className = "result error";
+          resultDiv.textContent = `❌ Details failed: ${error.message}`;
+          resultDiv.style.display = "block";
+        }
+      }
+    </script>
+  </body>
+</html>

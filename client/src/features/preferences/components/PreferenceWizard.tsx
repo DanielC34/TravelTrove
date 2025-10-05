@@ -6,7 +6,7 @@ import { MobilityForm } from "./forms/MobilityForm";
 import { BudgetForm } from "./forms/BudgetForm";
 import { ActivityForm } from "./forms/ActivityForm";
 import { Progress } from "@/components/ui/progress";
-import type { UserPreferences } from "../interfaces/preferences";
+import type { UserPreferences } from "../../../types/preferences";
 
 interface PreferencesWizardProps {
   onComplete: (preferences: UserPreferences) => void;

@@ -1,6 +1,6 @@
 import React from "react";
 import { useFormContext, Controller } from "react-hook-form";
-import { MobilityLevel } from "../../shared/interfaces/preferences/mobility";
+import { MobilityLevel } from "../../types/preferences/mobility";
 import { Checkbox } from "../common/Checkbox";
 import { ErrorMessage } from "../common/ErrorMessage";
 import { z } from "zod";

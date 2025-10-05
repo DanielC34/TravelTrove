@@ -1,7 +1,7 @@
 import React from "react";
-import { usePreferencesStore } from "../../store/preferencesStore";
+import { usePreferencesStore } from "../../stores/preferencesStore";
 import { PreferenceInput } from "./PreferenceInput";
-import { BudgetLevel } from "../../shared/interfaces/preferences/budget";
+import { BudgetLevel } from "../../types/preferences/budget";
 
 export const BudgetPreferencesForm: React.FC = () => {
   const { preferences, setPreferenceValue } = usePreferencesStore();

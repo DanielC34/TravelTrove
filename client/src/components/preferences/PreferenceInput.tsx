@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { usePreferencesStore } from "../../store/preferencesStore";
-import { PreferenceValue, UserPreferences } from "../../interfaces/preferences";
+import { usePreferencesStore } from "../../stores/preferencesStore";
+import { PreferenceValue, UserPreferences } from "../../types/preferences";
 import {
   validatePreferenceValue,
   ValidationError,

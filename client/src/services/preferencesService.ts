@@ -8,7 +8,7 @@ import {
   BudgetPreferences,
   ActivityComfortLevel,
   PreferenceValue,
-} from "../interfaces/preferences";
+} from "../types/preferences";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3000/api";
 

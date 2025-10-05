@@ -10,7 +10,7 @@ import {
   TravelInterests,
   BudgetPreferences,
   ActivityComfortLevel,
-} from "../interfaces/preferences";
+} from "../types/preferences";
 
 // Initial state
 const initialState: PreferencesContextState = {

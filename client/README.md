@@ -1,69 +1,176 @@
-# Welcome to your Lovable project
+# Travel Trove - Frontend
 
-## Project info
+A modern travel planning application built with React, TypeScript, and Tailwind CSS.
 
-**URL**: https://lovable.dev/projects/c5299250-faab-4c25-ab97-0448a1d31c24
+## 🚀 Tech Stack
 
-## How can I edit this code?
+### Core Technologies
 
-There are several ways of editing your application.
+- **React 18** - Modern React with hooks and concurrent features
+- **TypeScript** - Type-safe JavaScript development
+- **Vite** - Fast build tool and development server
+- **Tailwind CSS** - Utility-first CSS framework
 
-**Use Lovable**
+### UI & Styling
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c5299250-faab-4c25-ab97-0448a1d31c24) and start prompting.
+- **shadcn/ui** - Modern, accessible component library
+- **Radix UI** - Unstyled, accessible UI primitives
+- **Lucide React** - Beautiful, customizable icons
+- **Sonner** - Toast notifications
 
-Changes made via Lovable will be committed automatically to this repo.
+### State Management
 
-**Use your preferred IDE**
+- **Zustand** - Lightweight state management with persistence
+- **React Context** - Component-level state sharing
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Maps & Location Services
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **Leaflet** - Open-source mapping library
+- **React-Leaflet** - React components for Leaflet
+- **OpenStreetMap** - Free, open-source map tiles
 
-Follow these steps:
+### Development Tools
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+- **ESLint** - Code linting and formatting
+- **PostCSS** - CSS processing
+- **Hot Module Replacement (HMR)** - Instant development feedback
+
+## 📁 Project Structure
+
+```
+client/src/
+├── components/           # Reusable UI components
+│   ├── auth/            # Authentication components
+│   ├── common/          # Shared utility components
+│   ├── map/             # Map-related components
+│   ├── preferences/     # User preference components
+│   └── ui/              # shadcn/ui components
+├── context/             # React Context providers
+├── features/            # Feature-specific components
+│   └── preferences/     # Preference management features
+├── hooks/               # Custom React hooks
+├── lib/                 # Utility libraries
+├── pages/               # Page components
+├── services/            # API service layers
+├── stores/              # Zustand state stores
+├── types/               # TypeScript type definitions
+│   └── preferences/     # Consolidated preference types
+└── utils/               # Utility functions
+```
+
+## 🛠️ Development Setup
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+
+### Installation
+
+```bash
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navigate to the client directory
+cd travel-trove/client
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Available Scripts
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+# Start development server
+npm run dev
 
-**Use GitHub Codespaces**
+# Build for production
+npm run build
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Preview production build
+npm run preview
 
-## What technologies are used for this project?
+# Run linting
+npm run lint
+```
 
-This project is built with .
+## 🗺️ Map Integration
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The application features a comprehensive map system:
 
-## How can I deploy this project?
+- **OpenStreetMap Integration** - Free, open-source mapping
+- **Place Search** - Search for locations using OSM/Nominatim
+- **Interactive Markers** - Custom markers with popups
+- **Itinerary Integration** - Add places directly to trip itineraries
+- **Responsive Design** - Works on desktop and mobile
 
-Simply open [Lovable](https://lovable.dev/projects/c5299250-faab-4c25-ab97-0448a1d31c24) and click on Share -> Publish.
+## 🎨 Design System
 
-## I want to use a custom domain - is that possible?
+- **Tailwind CSS** - Utility-first styling approach
+- **shadcn/ui Components** - Consistent, accessible UI components
+- **Custom CSS** - Minimal custom styles for Leaflet integration
+- **Responsive Design** - Mobile-first approach
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## 🔧 Key Features
+
+### State Management
+
+- **Zustand Stores** - Centralized state with persistence
+- **Type Safety** - Full TypeScript coverage
+- **Hot Reloading** - Instant development feedback
+
+### Map Components
+
+- **SimpleMapComponent** - Direct Leaflet integration
+- **PlacesMap** - Search and selection interface
+- **AddToItineraryDialog** - Modal for itinerary management
+
+### Preference System
+
+- **Consolidated Types** - Single source of truth for preferences
+- **Form Validation** - Comprehensive input validation
+- **Persistent Storage** - User preferences saved locally
+
+## 🚀 Deployment
+
+### Production Build
+
+```bash
+npm run build
+```
+
+### Deployment Options
+
+- **Lovable Platform** - One-click deployment
+- **Netlify** - Custom domain support
+- **Vercel** - Serverless deployment
+- **GitHub Pages** - Static hosting
+
+## 📝 Development Notes
+
+### Code Organization
+
+- **Consolidated Types** - All preference types in `types/preferences/`
+- **Single Store Location** - All Zustand stores in `stores/`
+- **Component Co-location** - Related components grouped together
+- **Service Layer** - API calls abstracted in `services/`
+
+### Best Practices
+
+- **TypeScript First** - All components and functions typed
+- **Tailwind Classes** - Utility-first CSS approach
+- **Component Composition** - Reusable, composable components
+- **Error Boundaries** - Graceful error handling
+
+## 🔗 Related Projects
+
+- **Backend API** - Node.js/Express server in `/server`
+- **Database** - MongoDB with Mongoose ODM
+- **Authentication** - JWT-based auth system
+
+## 📄 License
+
+This project is part of the Travel Trove application suite.

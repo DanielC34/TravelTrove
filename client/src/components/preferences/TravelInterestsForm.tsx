@@ -1,10 +1,7 @@
 import React from "react";
-import { usePreferencesStore } from "../../store/preferencesStore";
+import { usePreferencesStore } from "../../stores/preferencesStore";
 import { PreferenceInput } from "./PreferenceInput";
-import {
-  TravelPace,
-  GroupSize,
-} from "../../shared/interfaces/preferences/travel";
+import { TravelPace, GroupSize } from "../../types/preferences/travel";
 
 export const TravelInterestsForm: React.FC = () => {
   const { preferences, setPreferenceValue } = usePreferencesStore();
