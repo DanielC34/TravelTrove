@@ -4,6 +4,8 @@
 
 Create a `.env` file in the `server` directory with the following variables:
 
+> **Note**: `MAPBOX_ACCESS_TOKEN` is optional. The places search uses OpenStreetMap Nominatim as the primary free provider. Mapbox can be added later for enhanced features.
+
 ```env
 # Server Configuration
 PORT=3001
@@ -20,6 +22,10 @@ JWT_REFRESH_EXPIRES_IN=7d
 # OpenAI Configuration
 OPENAI_API_KEY=your-openai-api-key-here
 
+# Mapbox Configuration (Optional - for enhanced place search)
+# Note: OSM/Nominatim is used as the primary free provider
+MAPBOX_ACCESS_TOKEN=your-mapbox-access-token-here
+
 # Client Configuration
 CLIENT_URL=http://localhost:3000
 
@@ -33,6 +39,7 @@ LOG_LEVEL=info
 ## Security Requirements
 
 ### JWT_SECRET
+
 - **Minimum length**: 32 characters
 - **Recommended**: 64+ characters
 - **Format**: Random string with mixed case, numbers, and special characters
@@ -41,16 +48,19 @@ LOG_LEVEL=info
 ### Generating a Secure JWT Secret
 
 #### Option 1: Using Node.js
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 ```
 
 #### Option 2: Using OpenSSL
+
 ```bash
 openssl rand -hex 64
 ```
 
 #### Option 3: Online Generator
+
 Use a secure random string generator (not recommended for production)
 
 ## Validation
@@ -66,9 +76,11 @@ The server will validate your environment variables on startup:
 If you see these errors, fix the corresponding environment variable:
 
 - `❌ CRITICAL: JWT_SECRET is not properly configured!`
+
   - Set a strong JWT_SECRET in your .env file
 
 - `❌ CRITICAL: JWT_SECRET is too weak!`
+
   - Make your JWT_SECRET at least 32 characters long
 
 - `❌ CRITICAL: Missing required environment variables:`
@@ -79,21 +91,25 @@ If you see these errors, fix the corresponding environment variable:
 For production deployment:
 
 1. **Use environment-specific .env files**:
+
    - `.env.development`
    - `.env.production`
    - `.env.test`
 
 2. **Secure JWT_SECRET**:
+
    - Use a cryptographically secure random generator
    - Store in environment variables, not in code
    - Rotate regularly
 
 3. **Database Security**:
+
    - Use MongoDB Atlas or secure MongoDB instance
    - Enable authentication
    - Use SSL/TLS connections
 
 4. **CORS Configuration**:
+
    - Set specific origins, not wildcards
    - Use HTTPS in production
 
@@ -106,16 +122,20 @@ For production deployment:
 1. Start the server: `npm run dev`
 2. Check health endpoint: `http://localhost:3001/health`
 3. Test authentication: `http://localhost:3001/api/auth/register`
+4. Test places search: `http://localhost:3001/api/places/search?q=paris&limit=5`
+5. Test place details: `http://localhost:3001/api/places/{place_id}`
 
 ## Troubleshooting
 
 ### Common Issues
 
 1. **"JWT_SECRET is not configured"**
+
    - Check your .env file exists in the server directory
    - Verify JWT_SECRET is set and not empty
 
 2. **"MongoDB connection error"**
+
    - Ensure MongoDB is running
    - Check MONGODB_URI format
    - Verify network connectivity
@@ -127,6 +147,7 @@ For production deployment:
 ### Debug Mode
 
 Set `NODE_ENV=development` to enable:
+
 - Request logging
 - Detailed error messages
 - User info in response headers

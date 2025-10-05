@@ -13,6 +13,42 @@ type AuthenticatedRequest = Request & {
 };
 
 export const aiController = {
+  // Test endpoint to generate a simple itinerary without requiring a trip
+  async testItinerary(req: Request, res: Response) {
+    try {
+      const testTripData = {
+        destination: "Paris, France",
+        startDate: "2024-06-01",
+        endDate: "2024-06-04",
+        travelers: {
+          count: 2,
+          type: "couple" as const,
+          details: "Romantic getaway"
+        },
+        budget: {
+          amount: 2000,
+          currency: "USD",
+          type: "moderate" as const
+        }
+      };
+
+      const itineraryData = await openaiService.generateItinerary(testTripData);
+      
+      res.json({
+        success: true,
+        message: "Test itinerary generated successfully",
+        data: itineraryData
+      });
+    } catch (error: any) {
+      console.error("Error generating test itinerary:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Error generating test itinerary",
+        error: error.message 
+      });
+    }
+  },
+
   // Generate itinerary for a trip
   async generateItinerary(req: AuthenticatedRequest, res: Response) {
     try {
@@ -54,11 +90,17 @@ export const aiController = {
         budget: trip.budget,
       });
 
-      // Create itinerary
+      // Create itinerary with proper structure
       const itinerary = new Itinerary({
         tripId,
         userId,
-        ...itineraryData,
+        name: itineraryData.name,
+        description: itineraryData.description,
+        days: itineraryData.days,
+        totalCost: itineraryData.totalCost,
+        status: "draft",
+        version: 1,
+        isPublic: false
       });
 
       const savedItinerary = await itinerary.save();
@@ -121,12 +163,17 @@ export const aiController = {
         budget: trip.budget,
       });
 
-      // Create new itinerary
+      // Create new itinerary with proper structure
       const itinerary = new Itinerary({
         tripId,
         userId,
-        ...itineraryData,
-        version: 2, // Increment version
+        name: itineraryData.name,
+        description: itineraryData.description,
+        days: itineraryData.days,
+        totalCost: itineraryData.totalCost,
+        status: "draft",
+        version: 2,
+        isPublic: false
       });
 
       const savedItinerary = await itinerary.save();

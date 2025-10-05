@@ -61,6 +61,26 @@ const Navbar = () => {
             >
               <span>Explore</span>
             </Link>
+            <Link
+              to="/map-test"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                isActive("/map-test")
+                  ? "bg-blue-50 text-blue-600"
+                  : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+              }`}
+            >
+              <span>🗺️ Map Test</span>
+            </Link>
+            <Link
+              to="/analytics"
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                isActive("/analytics")
+                  ? "bg-blue-50 text-blue-600"
+                  : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+              }`}
+            >
+              <span>📊 Analytics</span>
+            </Link>
           </div>
 
           {/* User Menu */}
@@ -150,6 +170,28 @@ const Navbar = () => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Explore
+              </Link>
+              <Link
+                to="/map-test"
+                className={`block px-4 py-2 rounded-lg transition-colors ${
+                  isActive("/map-test")
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                🗺️ Map Test
+              </Link>
+              <Link
+                to="/analytics"
+                className={`block px-4 py-2 rounded-lg transition-colors ${
+                  isActive("/analytics")
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                }`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                📊 Analytics
               </Link>
 
               {isAuthenticated ? (

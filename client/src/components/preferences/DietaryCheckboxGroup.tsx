@@ -1,6 +1,6 @@
 import React from "react";
 import { useFormContext, Controller } from "react-hook-form";
-import { DietaryRestriction } from "../../shared/interfaces/preferences/dietary";
+import { DietaryRestriction } from "../../types/preferences/dietary";
 import { Checkbox } from "../common/Checkbox";
 import { ErrorMessage } from "../common/ErrorMessage";
 import { z } from "zod";

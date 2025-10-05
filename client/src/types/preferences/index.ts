@@ -1,3 +1,20 @@
+/**
+ * Consolidated Preferences Types
+ * This file exports all preference-related interfaces and types
+ * Consolidates interfaces from multiple sources into a single source of truth
+ */
+
+// Re-export all the shared interfaces
+export * from "./dietary";
+export * from "./mobility";
+export * from "./travel-interests";
+export * from "./budget";
+export * from "./accommodation";
+export * from "./activity";
+export * from "./travel";
+export * from "./user-preferences";
+
+// Additional types from the main interfaces/preferences.ts file
 export type DietaryRestriction =
   | "vegetarian"
   | "vegan"
@@ -5,11 +22,13 @@ export type DietaryRestriction =
   | "dairy-free"
   | "halal"
   | "kosher";
+
 export type MobilityNeed =
   | "wheelchair"
   | "elevator"
   | "ground-floor"
   | "assistance";
+
 export type TravelInterest =
   | "adventure"
   | "relaxation"
@@ -17,18 +36,21 @@ export type TravelInterest =
   | "nature"
   | "food"
   | "shopping";
+
 export type AccommodationType =
   | "hotel"
   | "hostel"
   | "apartment"
   | "resort"
   | "camping";
+
 export type TransportationPreference =
   | "public"
   | "private"
   | "walking"
   | "cycling";
 
+// Additional interfaces from the main interfaces/preferences.ts file
 export interface DietaryPreferences {
   restrictions: DietaryRestriction[];
   allergies: string[];

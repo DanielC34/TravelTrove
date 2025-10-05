@@ -1,8 +1,8 @@
 import React from "react";
-import { usePreferencesStore } from "../../store/preferencesStore";
+import { usePreferencesStore } from "../../stores/preferencesStore";
 import { PreferenceInput } from "./PreferenceInput";
-import { PhysicalIntensity } from "../../shared/interfaces/preferences/activity";
-import { ActivityComfortLevels } from "../../shared/interfaces/preferences/activity";
+import { PhysicalIntensity } from "../../types/preferences/activity";
+import { ActivityComfortLevels } from "../../types/preferences/activity";
 
 export const ActivityComfortForm: React.FC = () => {
   const { preferences, setPreferenceValue } = usePreferencesStore();

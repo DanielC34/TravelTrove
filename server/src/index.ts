@@ -4,8 +4,6 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-
-
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
@@ -15,18 +13,25 @@ import { authRouter } from "./routes/auth.routes";
 import { preferencesRouter } from "./routes/preferences.routes";
 import { tripRouter } from "./routes/trip.routes";
 import { aiRouter } from "./routes/ai.routes";
+import { itineraryRouter } from "./routes/itinerary.routes";
+import { placesRouter } from "./routes/places.routes";
+import userActionRouter from "./routes/userAction.routes";
 import { globalErrorHandler } from "./utils/errorHandler";
 
 // Validate required environment variables
 const requiredEnvVars = ["JWT_SECRET", "MONGODB_URI"];
-const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+const missingEnvVars = requiredEnvVars.filter(
+  (varName) => !process.env[varName]
+);
 
 if (missingEnvVars.length > 0) {
   console.error("❌ CRITICAL: Missing required environment variables:");
-  missingEnvVars.forEach(varName => {
+  missingEnvVars.forEach((varName) => {
     console.error(`   - ${varName}`);
   });
-  console.error("   Please check your .env file and ensure all required variables are set.");
+  console.error(
+    "   Please check your .env file and ensure all required variables are set."
+  );
   process.exit(1);
 }
 
@@ -42,24 +47,32 @@ if (JWT_SECRET.length < 32) {
 const app = express();
 
 // Security middleware
-app.use(cors({
-  origin: ["http://localhost:8080", "http://localhost:5173", "http://localhost:3000"],
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:8080",
+      "http://localhost:5173",
+      "http://localhost:3000",
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 // Body parsing middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Session middleware for OAuth
-app.use(session({
-  secret: process.env.JWT_SECRET!,
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: false } // Set to true in production with HTTPS
-}));
+app.use(
+  session({
+    secret: process.env.JWT_SECRET!,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false }, // Set to true in production with HTTPS
+  })
+);
 
 // Passport middleware
 app.use(passport.initialize());
@@ -69,10 +82,12 @@ app.use(passport.session());
 if (process.env.NODE_ENV === "development") {
   app.use((req, res, next) => {
     const start = Date.now();
-    res.on('finish', () => {
+    res.on("finish", () => {
       const duration = Date.now() - start;
       if (res.statusCode < 400) {
-        console.log(`✅ ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
+        console.log(
+          `✅ ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`
+        );
       }
     });
     next();
@@ -86,7 +101,8 @@ app.get("/health", (req, res) => {
     message: "Travel Trove API is running",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
-    mongodb: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+    mongodb:
+      mongoose.connection.readyState === 1 ? "connected" : "disconnected",
     version: process.env.npm_package_version || "1.0.0",
   });
 });
@@ -104,6 +120,9 @@ app.use("/api/auth", authRouter);
 app.use("/api/preferences", preferencesRouter);
 app.use("/api/trips", tripRouter);
 app.use("/api/ai", aiRouter);
+app.use("/api/itineraries", itineraryRouter);
+app.use("/api/places", placesRouter);
+app.use("/api/user-actions", userActionRouter);
 
 // 404 handler for undefined routes
 app.use("*", (req, res) => {

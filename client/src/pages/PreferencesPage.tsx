@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { MobileNav } from "@/components/MobileNav";
 import { Footer } from "@/components/Footer";
 import { toast } from "sonner";
-import type { UserPreferences } from "@/features/preferences/interfaces/preferences";
+import type { UserPreferences } from "@/types/preferences";
 
 export default function PreferencesPage() {
   const navigate = useNavigate();

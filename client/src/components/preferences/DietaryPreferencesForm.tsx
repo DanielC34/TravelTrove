@@ -1,6 +1,6 @@
 import React from "react";
 import { PreferenceInput } from "./PreferenceInput";
-import { DietaryRestriction } from "../../interfaces/preferences";
+import { DietaryRestriction } from "../../types/preferences";
 
 const DIETARY_RESTRICTIONS: DietaryRestriction[] = [
   "vegetarian",

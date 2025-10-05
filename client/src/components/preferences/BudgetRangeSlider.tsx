@@ -1,6 +1,6 @@
 import React from "react";
 import { useFormContext, Controller, Path } from "react-hook-form";
-import { BudgetLevel } from "../../shared/interfaces/preferences/budget";
+import { BudgetLevel } from "../../types/preferences/budget";
 import { Slider } from "../common/Slider";
 import { ErrorMessage } from "../common/ErrorMessage";
 import { z } from "zod";

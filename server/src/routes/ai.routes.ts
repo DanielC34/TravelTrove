@@ -4,7 +4,10 @@ import { auth } from "../middleware/auth";
 
 export const aiRouter = Router();
 
-// All routes require authentication
+// Test route (no auth required for testing)
+aiRouter.get("/test-itinerary", aiController.testItinerary);
+
+// All other routes require authentication
 aiRouter.use(auth);
 
 // Generate itinerary for a trip

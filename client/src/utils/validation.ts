@@ -1,20 +1,17 @@
-import {
-  BudgetLevel,
-  BudgetPreferences,
-} from "../shared/interfaces/preferences/budget";
+import { BudgetLevel, BudgetPreferences } from "../types/preferences/budget";
 import {
   TravelPace,
   GroupSize,
   TravelPreferences,
-} from "../shared/interfaces/preferences/travel";
+} from "../types/preferences/travel";
 import {
   DietaryRestriction,
   DietaryPreferences,
-} from "../shared/interfaces/preferences/dietary";
+} from "../types/preferences/dietary";
 import {
   MobilityLevel,
   MobilityPreferences,
-} from "../shared/interfaces/preferences/mobility";
+} from "../types/preferences/mobility";
 import {
   PhysicalIntensity,
   ActivityComfortPreferences,
@@ -22,7 +19,7 @@ import {
   WeatherPreference,
   CrowdLevel,
   ActivityTiming,
-} from "../shared/interfaces/preferences/activity";
+} from "../types/preferences/activity";
 
 export class ValidationError extends Error {
   constructor(message: string) {

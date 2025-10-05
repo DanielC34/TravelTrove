@@ -7,7 +7,7 @@ import {
   UserPreferences,
   PreferencesFormData,
   PreferenceValue,
-} from "../interfaces/preferences";
+} from "../types/preferences";
 
 interface PreferencesState {
   // State

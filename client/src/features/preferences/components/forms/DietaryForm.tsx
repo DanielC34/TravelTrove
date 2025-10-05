@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { ArrowRight, ArrowLeft, Plus, X } from "lucide-react";
-import { DietaryRestriction } from "../../interfaces/preferences";
+import { DietaryRestriction } from "../../../../types/preferences/dietary";
 
 interface DietaryFormProps {
   onComplete: (data: any) => void;

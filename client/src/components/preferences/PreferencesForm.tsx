@@ -1,5 +1,5 @@
 import React from "react";
-import { usePreferencesStore } from "../../store/preferencesStore";
+import { usePreferencesStore } from "../../stores/preferencesStore";
 import { ErrorBoundary } from "../common/ErrorBoundary";
 import { ActivityComfortForm } from "./ActivityComfortForm";
 import { BudgetPreferencesForm } from "./BudgetPreferencesForm";
@@ -13,15 +13,15 @@ import {
   validateActivityComfortLevels,
   validateCrossFieldDependencies,
 } from "../../utils/validation";
-import { UserPreferences } from "../../interfaces/preferences";
-import { BudgetPreferences as BudgetPreferencesType } from "../../shared/interfaces/preferences/budget";
-import { TravelPreferences as TravelPreferencesType } from "../../shared/interfaces/preferences/travel";
-import { DietaryPreferences as DietaryPreferencesType } from "../../shared/interfaces/preferences/dietary";
-import { MobilityPreferences as MobilityPreferencesType } from "../../shared/interfaces/preferences/mobility";
+import { UserPreferences } from "../../types/preferences";
+import { BudgetPreferences as BudgetPreferencesType } from "../../types/preferences/budget";
+import { TravelPreferences as TravelPreferencesType } from "../../types/preferences/travel";
+import { DietaryPreferences as DietaryPreferencesType } from "../../types/preferences/dietary";
+import { MobilityPreferences as MobilityPreferencesType } from "../../types/preferences/mobility";
 import {
   ActivityComfortPreferences as ActivityComfortPreferencesType,
   ActivityComfortLevels as ActivityComfortLevelsType,
-} from "../../shared/interfaces/preferences/activity";
+} from "../../types/preferences/activity";
 
 interface PreferencesState {
   budget?: Partial<BudgetPreferencesType>;

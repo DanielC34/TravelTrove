@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { ArrowRight, ArrowLeft } from "lucide-react";
-import { MobilityLevel } from "../../interfaces/preferences";
+import { MobilityLevel } from "../../../../types/preferences/mobility";
 
 interface MobilityFormProps {
   onComplete: (data: any) => void;

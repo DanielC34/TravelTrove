@@ -22,9 +22,11 @@ import {
   GripVertical,
 } from "lucide-react";
 import { ItineraryDay } from "@/services/aiService";
+import { itineraryService } from "@/services/itineraryService";
 import { toast } from "sonner";
 
 interface ItineraryEditorProps {
+  tripId: string;
   days: ItineraryDay[];
   onSave: (updatedDays: ItineraryDay[]) => void;
   onCancel: () => void;
@@ -32,6 +34,7 @@ interface ItineraryEditorProps {
 }
 
 export function ItineraryEditor({
+  tripId,
   days,
   onSave,
   onCancel,
@@ -44,7 +47,7 @@ export function ItineraryEditor({
   } | null>(null);
 
   const handleDragEnd = useCallback(
-    (result: DropResult) => {
+    async (result: DropResult) => {
       if (!result.destination) return;
 
       const { source, destination } = result;
@@ -58,6 +61,15 @@ export function ItineraryEditor({
         const [removed] = activities.splice(source.index, 1);
         activities.splice(destination.index, 0, removed);
         newDays[dayIndex] = { ...day, activities };
+        
+        // Persist to API
+        try {
+          await itineraryService.reorderActivities(tripId, day.dayNumber, activities);
+          toast.success("Activities reordered successfully!");
+        } catch (error) {
+          toast.error("Failed to reorder activities");
+          return; // Don't update state if API call fails
+        }
       } else {
         // Handle moving activities between days
         const sourceDayIndex = parseInt(source.droppableId);
@@ -75,36 +87,62 @@ export function ItineraryEditor({
           activities: sourceActivities,
         };
         newDays[destDayIndex] = { ...destDay, activities: destActivities };
+        
+        // Persist both days to API
+        try {
+          await Promise.all([
+            itineraryService.reorderActivities(tripId, sourceDay.dayNumber, sourceActivities),
+            itineraryService.reorderActivities(tripId, destDay.dayNumber, destActivities)
+          ]);
+          toast.success("Activity moved successfully!");
+        } catch (error) {
+          toast.error("Failed to move activity");
+          return; // Don't update state if API call fails
+        }
       }
 
       setEditedDays(newDays);
     },
-    [editedDays]
+    [editedDays, tripId]
   );
 
   const handleEditActivity = (dayIndex: number, activityIndex: number) => {
     setEditingActivity({ dayIndex, activityIndex });
   };
 
-  const handleSaveActivity = (updatedActivity: any) => {
+  const handleSaveActivity = async (updatedActivity: any) => {
     if (!editingActivity) return;
 
     const { dayIndex, activityIndex } = editingActivity;
-    const newDays = [...editedDays];
-    newDays[dayIndex].activities[activityIndex] = updatedActivity;
-    setEditedDays(newDays);
-    setEditingActivity(null);
-    toast.success("Activity updated successfully!");
+    const day = editedDays[dayIndex];
+    
+    try {
+      await itineraryService.updateActivity(tripId, day.dayNumber, activityIndex, updatedActivity);
+      const newDays = [...editedDays];
+      newDays[dayIndex].activities[activityIndex] = updatedActivity;
+      setEditedDays(newDays);
+      setEditingActivity(null);
+      toast.success("Activity updated successfully!");
+    } catch (error) {
+      toast.error("Failed to update activity");
+    }
   };
 
-  const handleDeleteActivity = (dayIndex: number, activityIndex: number) => {
-    const newDays = [...editedDays];
-    newDays[dayIndex].activities.splice(activityIndex, 1);
-    setEditedDays(newDays);
-    toast.success("Activity deleted successfully!");
+  const handleDeleteActivity = async (dayIndex: number, activityIndex: number) => {
+    const day = editedDays[dayIndex];
+    
+    try {
+      await itineraryService.removeActivity(tripId, day.dayNumber, activityIndex);
+      const newDays = [...editedDays];
+      newDays[dayIndex].activities.splice(activityIndex, 1);
+      setEditedDays(newDays);
+      toast.success("Activity deleted successfully!");
+    } catch (error) {
+      toast.error("Failed to delete activity");
+    }
   };
 
-  const handleAddActivity = (dayIndex: number) => {
+  const handleAddActivity = async (dayIndex: number) => {
     const newActivity = {
       name: "New Activity",
       description: "",
@@ -119,13 +157,21 @@ export function ItineraryEditor({
       priority: "recommended" as const,
     };
 
-    const newDays = [...editedDays];
-    newDays[dayIndex].activities.push(newActivity);
-    setEditedDays(newDays);
-    setEditingActivity({
-      dayIndex,
-      activityIndex: newDays[dayIndex].activities.length - 1,
-    });
+    const day = editedDays[dayIndex];
+    
+    try {
+      await itineraryService.addActivity(tripId, day.dayNumber, newActivity);
+      const newDays = [...editedDays];
+      newDays[dayIndex].activities.push(newActivity);
+      setEditedDays(newDays);
+      setEditingActivity({
+        dayIndex,
+        activityIndex: newDays[dayIndex].activities.length - 1,
+      });
+      toast.success("Activity added successfully!");
+    } catch (error) {
+      toast.error("Failed to add activity");
+    }
   };
 
   const handleSave = () => {

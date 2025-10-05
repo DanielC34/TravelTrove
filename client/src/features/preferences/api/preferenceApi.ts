@@ -1,5 +1,5 @@
 import api from "@/services/api";
-import type { UserPreferences } from "@/features/preferences/interfaces/preference";
+import type { UserPreferences } from "../../../types/preferences";
 
 export const preferencesApi = {
   /**
