@@ -166,8 +166,17 @@ const AddToItineraryDialog: React.FC<AddToItineraryDialogProps> = ({
 
   if (!place) return null;
 
+  // Debug logging
+  console.log("AddToItineraryDialog render:", { isOpen, place: place?.name });
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        console.log("Dialog onOpenChange:", open);
+        if (!open) onClose();
+      }}
+    >
       <DialogContent className="sm:max-w-[500px] z-[9999] relative">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

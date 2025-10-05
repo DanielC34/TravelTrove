@@ -24,11 +24,15 @@
 
 /* Z-index fixes for modal compatibility */
 [data-radix-dialog-overlay] {
-  z-index: 9998 !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0, 0, 0, 0.6) !important;
+  z-index: 2147483646 !important; /* sit above any app element */
+  pointer-events: auto !important;
 }
 
 [data-radix-dialog-content] {
-  z-index: 9999 !important;
+  z-index: 2147483647 !important; /* above overlay */
 }
 
 /* Leaflet z-index hierarchy */

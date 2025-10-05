@@ -100,8 +100,10 @@ const PlacesMap: React.FC<PlacesMapProps> = ({
       toast.error("Trip ID is required to add places to itinerary");
       return;
     }
+    console.log("Opening itinerary dialog for:", place.name);
     setSelectedPlaceForItinerary(place);
     setShowItineraryDialog(true);
+    console.log("Dialog state set to true");
   };
 
   // Handle like/unlike place
@@ -128,6 +130,7 @@ const PlacesMap: React.FC<PlacesMapProps> = ({
 
   // Handle itinerary dialog close
   const handleItineraryDialogClose = () => {
+    console.log("Closing itinerary dialog");
     setShowItineraryDialog(false);
     setSelectedPlaceForItinerary(null);
   };
@@ -135,134 +138,143 @@ const PlacesMap: React.FC<PlacesMapProps> = ({
   // Combine search results and selected places for map display
   const allPlaces = [...searchResults, ...selectedPlaces];
 
-  return (
-    <div className={`w-full ${className}`}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Places Search & Map
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Search Section */}
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Input
-                type="text"
-                placeholder="Search for places (e.g., Paris, restaurants, hotels)..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="w-full"
-              />
-            </div>
-            <Button
-              onClick={handleSearch}
-              disabled={isSearching}
-              className="px-6"
-            >
-              {isSearching ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
+  // Debug logging
+  console.log("PlacesMap render state:", {
+    showItineraryDialog,
+    selectedPlaceForItinerary: selectedPlaceForItinerary?.name,
+    tripId,
+  });
 
-          {/* Search Results */}
-          {searchResults.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-700">
-                Search Results ({searchResults.length})
-              </h3>
-              <div className="max-h-32 overflow-y-auto space-y-1">
-                {searchResults.map((place) => (
-                  <div
-                    key={place.id}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{place.name}</p>
-                      <p className="text-xs text-gray-600">{place.address}</p>
-                      {place.category && (
-                        <Badge variant="secondary" className="text-xs mt-1">
-                          {place.category}
-                        </Badge>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handlePlaceSelect(place)}
-                      >
-                        Select
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleLikePlace(place)}
-                        className={
-                          likedPlaces.has(place.id)
-                            ? "text-red-500 border-red-500"
-                            : ""
-                        }
-                      >
-                        <Heart
-                          className={`h-3 w-3 ${
-                            likedPlaces.has(place.id) ? "fill-current" : ""
-                          }`}
-                        />
-                      </Button>
-                      {tripId && (
+  return (
+    <>
+      <div className={`w-full ${className}`}>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Places Search & Map
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Search Section */}
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Input
+                  type="text"
+                  placeholder="Search for places (e.g., Paris, restaurants, hotels)..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="w-full"
+                />
+              </div>
+              <Button
+                onClick={handleSearch}
+                disabled={isSearching}
+                className="px-6"
+              >
+                {isSearching ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Search className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+
+            {/* Search Results */}
+            {searchResults.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-gray-700">
+                  Search Results ({searchResults.length})
+                </h3>
+                <div className="max-h-32 overflow-y-auto space-y-1">
+                  {searchResults.map((place) => (
+                    <div
+                      key={place.id}
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{place.name}</p>
+                        <p className="text-xs text-gray-600">{place.address}</p>
+                        {place.category && (
+                          <Badge variant="secondary" className="text-xs mt-1">
+                            {place.category}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
                         <Button
                           size="sm"
-                          variant="default"
-                          onClick={() => handleAddToItinerary(place)}
-                          className="bg-green-600 hover:bg-green-700"
+                          variant="outline"
+                          onClick={() => handlePlaceSelect(place)}
                         >
-                          <Plus className="h-3 w-3 mr-1" />
-                          Add to Itinerary
+                          Select
                         </Button>
-                      )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleLikePlace(place)}
+                          className={
+                            likedPlaces.has(place.id)
+                              ? "text-red-500 border-red-500"
+                              : ""
+                          }
+                        >
+                          <Heart
+                            className={`h-3 w-3 ${
+                              likedPlaces.has(place.id) ? "fill-current" : ""
+                            }`}
+                          />
+                        </Button>
+                        {tripId && (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => handleAddToItinerary(place)}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add to Itinerary
+                          </Button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
+            )}
+
+            {/* Map */}
+            <div className="border rounded-lg overflow-hidden relative z-[1]">
+              <SimpleMapComponent
+                places={allPlaces}
+                center={mapCenter}
+                zoom={13}
+                height={height}
+                onPlaceSelect={handlePlaceSelect}
+              />
             </div>
-          )}
 
-          {/* Map */}
-          <div className="border rounded-lg overflow-hidden relative z-[1]">
-            <SimpleMapComponent
-              places={allPlaces}
-              center={mapCenter}
-              zoom={13}
-              height={height}
-              onPlaceSelect={handlePlaceSelect}
-            />
-          </div>
-
-          {/* Selected Places Summary */}
-          {selectedPlaces.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-gray-700">
-                Selected Places ({selectedPlaces.length})
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {selectedPlaces.map((place) => (
-                  <Badge key={place.id} variant="default" className="text-xs">
-                    {place.name}
-                  </Badge>
-                ))}
+            {/* Selected Places Summary */}
+            {selectedPlaces.length > 0 && (
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium text-gray-700">
+                  Selected Places ({selectedPlaces.length})
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {selectedPlaces.map((place) => (
+                    <Badge key={place.id} variant="default" className="text-xs">
+                      {place.name}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* Add to Itinerary Dialog */}
+      {/* Add to Itinerary Dialog - Rendered outside the main container */}
       {tripId && (
         <AddToItineraryDialog
           isOpen={showItineraryDialog}
@@ -275,7 +287,7 @@ const PlacesMap: React.FC<PlacesMapProps> = ({
           }}
         />
       )}
-    </div>
+    </>
   );
 };
 
