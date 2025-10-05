@@ -3,7 +3,7 @@ const axios = require("axios");
 const API_BASE_URL = "http://localhost:3001/api";
 
 // Test data
-const testUserActions = [
+const testActions = [
   {
     actionType: "search",
     metadata: {
@@ -54,7 +54,7 @@ async function testUserActions() {
     // For now, we'll test the endpoints structure
 
     console.log("📋 Test Actions to Record:");
-    testUserActions.forEach((action, index) => {
+    testActions.forEach((action, index) => {
       console.log(
         `${index + 1}. ${action.actionType.toUpperCase()}: ${
           action.metadata.placeName || action.metadata.query
@@ -77,7 +77,7 @@ async function testUserActions() {
     console.log("GET /api/user-actions/place/:placeId - Get place actions");
 
     console.log("\n📊 Expected Data Structure:");
-    console.log(JSON.stringify(testUserActions[0], null, 2));
+    console.log(JSON.stringify(testActions[0], null, 2));
 
     console.log("\n✅ User Action System Ready!");
     console.log("💡 To test with real data:");
